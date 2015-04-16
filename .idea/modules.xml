@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/example-app/example-app.iml" filepath="$PROJECT_DIR$/example-app/example-app.iml" />
       <module fileurl="file://$PROJECT_DIR$/runner/runner.iml" filepath="$PROJECT_DIR$/runner/runner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/support-v4/support-v4.iml" filepath="$PROJECT_DIR$/support-v4/support-v4.iml" />
       <module fileurl="file://$PROJECT_DIR$/tarator.iml" filepath="$PROJECT_DIR$/tarator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/testapp/testapp.iml" filepath="$PROJECT_DIR$/testapp/testapp.iml" />
     </modules>
   </component>
 </project>
-
