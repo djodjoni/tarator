@@ -5,6 +5,12 @@ local.properties
 .DS_Store
 build
 
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
 *.iml
 
 
@@ -13,7 +19,6 @@ build
 *.war
 *.ear
 *.aar
-
 # Built application files
 *.apk
 *.ap_
