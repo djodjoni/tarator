@@ -5,6 +5,7 @@ import android.app.Activity;
 
 import org.djodjo.tarator.example.MainActivity;
 import org.djodjo.tarator.example.R;
+import org.djodjo.tarator.iteraction.TextViewInteraction;
 
 import java.util.ArrayList;
 
@@ -39,7 +40,7 @@ public class MenuTest extends BaseActivityTest {
 
 
         for (int item : items) {
-            onTextView(withText(getInstrumentation().getTargetContext().getString(item))).check(matches(isDisplayed()));
+            onTextView(withText(getInstrumentation().getTargetContext().getString(item))).<TextViewInteraction>check(matches(isDisplayed())).assertThat().isVisible();
             onButton(withText(getInstrumentation().getTargetContext().getString(item))).assertThat().isNotEmpty().hasTextSize(50);
             Thread.sleep(2000);
             onView(withText(getInstrumentation().getTargetContext().getString(item))).perform(click());

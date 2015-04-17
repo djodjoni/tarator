@@ -73,21 +73,21 @@ public class ViewInteraction {
    * @param viewActions one or more actions to execute.
    * @return this interaction for further perform/verification calls.
    */
-  public ViewInteraction perform(final ViewAction... viewActions) {
+  public <T extends ViewInteraction> T perform(final ViewAction... viewActions) {
     checkNotNull(viewActions);
     for (ViewAction action : viewActions) {
       doPerform(action);
     }
-    return this;
+    return (T)this;
   }
 
 
   /**
    * Makes this ViewInteraction scoped to the root selected by the given root matcher.
    */
-  public ViewInteraction inRoot(Matcher<Root> rootMatcher) {
+  public <T extends ViewInteraction> T inRoot(Matcher<Root> rootMatcher) {
     this.rootMatcherRef.set(checkNotNull(rootMatcher));
-    return this;
+    return (T)this;
   }
 
   private void doPerform(final ViewAction viewAction) {
@@ -134,7 +134,7 @@ public class ViewInteraction {
    * @param viewAssert the assertion to perform.
    * @return this interaction for further perform/verification calls.
    */
-  public ViewInteraction check(final ViewAssertion viewAssert) {
+  public <T extends ViewInteraction> T check(final ViewAssertion viewAssert) {
     checkNotNull(viewAssert);
     runSynchronouslyOnUiThread(new Runnable() {
       @Override
@@ -151,7 +151,7 @@ public class ViewInteraction {
         viewAssert.check(targetView, missingViewException);
       }
     });
-    return this;
+    return (T)this;
   }
 
   protected void runSynchronouslyOnUiThread(Runnable action) {
