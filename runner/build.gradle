@@ -16,10 +16,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    lintOptions {
+        abortOnError false
+    }
+
 }
 
 dependencies {
-    //compile ('com.android.support.test.espresso:espresso-core:2.0')
-    compile ('com.android.support.test:testing-support-lib:0.1')
-    compile 'info.cukes:cucumber-android:1.2.2'
+    provided ('com.android.support.test:testing-support-lib:0.1')
+    provided 'info.cukes:cucumber-android:1.2.2'
 }
+
+apply from: 'https://raw.githubusercontent.com/djodjoni/gradle-mvn-push/master/gradle-mvn-push-android.gradle'

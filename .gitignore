@@ -1,11 +1,24 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+.gradle
+local.properties
+.idea
+.DS_Store
+build
+
+>>>>>>> 44397d66907db0cd99090cfff806a6231438b436
 .gradle
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
 .DS_Store
 /build
+<<<<<<< HEAD
 
+=======
+>>>>>>> 44397d66907db0cd99090cfff806a6231438b436
 *.iml
 
 
@@ -14,7 +27,10 @@
 *.war
 *.ear
 *.aar
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 44397d66907db0cd99090cfff806a6231438b436
 # Built application files
 *.apk
 *.ap_
@@ -41,4 +57,7 @@ proguard/
 
 # Log Files
 *.log
+<<<<<<< HEAD
 >>>>>>> ba97773e2a91403a45879547ab530e3bc0b169dd
+=======
+>>>>>>> 44397d66907db0cd99090cfff806a6231438b436
