@@ -1,21 +1,29 @@
 package org.djodjo.tarator.matcher;
 
+import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Rect;
+import android.support.test.espresso.matcher.BoundedMatcher;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.webkit.WebView;
 import android.widget.Checkable;
+import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import com.android.support.test.deps.guava.base.Preconditions;
+import com.android.support.test.deps.guava.base.Predicate;
+import com.android.support.test.deps.guava.collect.Iterables;
 
 import junit.framework.AssertionFailedError;
 
-import org.djodjo.tarator.util.HumanReadables;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -25,7 +33,6 @@ import org.hamcrest.TypeSafeMatcher;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static org.djodjo.tarator.util.TreeIterables.breadthFirstViewTraversal;
 import static org.hamcrest.Matchers.is;
 
@@ -117,30 +124,39 @@ public final class ViewMatchers {
    *   surface area of the view must be shown to the user to be accepted.
    */
   public static Matcher<View> isDisplayingAtLeast(final int areaPercentage) {
-    checkState(areaPercentage <= 100, "Cannot have over 100 percent: %s", areaPercentage);
-    checkState(areaPercentage > 0, "Must have a positive, non-zero value: %s", areaPercentage);
-    return new TypeSafeMatcher<View>() {
-      @Override
-      public void describeTo(Description description) {
-        description.appendText(String.format(
-            "at least %s percent of the view's area is displayed to the user.", areaPercentage));
-      }
+      Preconditions.checkState(areaPercentage <= 100, "Cannot have over 100 percent: %s", new Object[]{Integer.valueOf(areaPercentage)});
+      Preconditions.checkState(areaPercentage > 0, "Must have a positive, non-zero value: %s", new Object[]{Integer.valueOf(areaPercentage)});
+      return new TypeSafeMatcher<View>() {
+          public void describeTo(Description description) {
+              description.appendText(String.format("at least %s percent of the view\'s area is displayed to the user.", new Object[]{Integer.valueOf(areaPercentage)}));
+          }
 
-      @Override
-      public boolean matchesSafely(View view) {
-        Rect visibleParts = new Rect();
-        boolean visibleAtAll = view.getGlobalVisibleRect(visibleParts);
-        if (!visibleAtAll) {
-          return false;
-        }
-        double maxArea = view.getHeight() * view.getWidth();
-        double visibleArea = visibleParts.height() * visibleParts.width();
-        int displayedPercentage = (int) ((visibleArea / maxArea) * 100);
+          public boolean matchesSafely(View view) {
+              Rect visibleParts = new Rect();
+              boolean visibleAtAll = view.getGlobalVisibleRect(visibleParts);
+              if(!visibleAtAll) {
+                  return false;
+              } else {
+                  Rect screen = this.getScreenWithoutStatusBarActionBar(view);
+                  int viewHeight = view.getHeight() > screen.height()?screen.height():view.getHeight();
+                  int viewWidth = view.getWidth() > screen.width()?screen.width():view.getWidth();
+                  double maxArea = (double)(viewHeight * viewWidth);
+                  double visibleArea = (double)(visibleParts.height() * visibleParts.width());
+                  int displayedPercentage = (int)(visibleArea / maxArea * 100.0D);
+                  return displayedPercentage >= areaPercentage && ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE).matches(view);
+              }
+          }
 
-        return displayedPercentage >= areaPercentage
-            && withEffectiveVisibility(Visibility.VISIBLE).matches(view);
-      }
-    };
+          private Rect getScreenWithoutStatusBarActionBar(View view) {
+              DisplayMetrics m = new DisplayMetrics();
+              ((WindowManager)view.getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(m);
+              int resourceId = view.getContext().getResources().getIdentifier("status_bar_height", "dimen", "android");
+              int statusBarHeight = resourceId > 0?view.getContext().getResources().getDimensionPixelSize(resourceId):0;
+              TypedValue tv = new TypedValue();
+              int actionBarHeight = view.getContext().getTheme().resolveAttribute(16843499, tv, true)?TypedValue.complexToDimensionPixelSize(tv.data, view.getContext().getResources().getDisplayMetrics()):0;
+              return new Rect(0, 0, m.widthPixels, m.heightPixels - (statusBarHeight + actionBarHeight));
+          }
+      };
   }
 
 
@@ -195,7 +211,17 @@ public final class ViewMatchers {
       }
     };
   }
+    public static Matcher<View> isSelected() {
+        return new TypeSafeMatcher<View>() {
+            public void describeTo(Description description) {
+                description.appendText("is selected");
+            }
 
+            public boolean matchesSafely(View view) {
+                return view.isSelected();
+            }
+        };
+    }
   /**
    * Returns an {@link Matcher} that matches {@link View}s based on their siblings.<br>
    * <br>
@@ -270,8 +296,28 @@ public final class ViewMatchers {
    *
    * @param id the resource id.
    */
-  public static Matcher<View> withId(int id) {
-    return withId(is(id));
+  public static Matcher<View> withId(final int id) {
+      return new TypeSafeMatcher<View>() {
+          Resources resources = null;
+
+          public void describeTo(Description description) {
+              String idDescription = Integer.toString(id);
+              if(this.resources != null) {
+                  try {
+                      idDescription = this.resources.getResourceName(id);
+                  } catch (NotFoundException var4) {
+                      idDescription = String.format("%s (resource name not found)", new Object[]{Integer.valueOf(id)});
+                  }
+              }
+
+              description.appendText("with id: " + idDescription);
+          }
+
+          public boolean matchesSafely(View view) {
+              this.resources = view.getResources();
+              return id == view.getId();
+          }
+      };
   }
 
   /**
@@ -292,7 +338,7 @@ public final class ViewMatchers {
 
       @Override
       public boolean matchesSafely(View view) {
-        return integerMatcher.matches(view.getId());
+        return integerMatcher.matches(Integer.valueOf(view.getId()));
       }
     };
   }
@@ -385,47 +431,83 @@ public final class ViewMatchers {
    *
    * @param resourceId the string resource the text view is expected to hold.
    */
-  public static Matcher<View> withText(final int resourceId) {
-
-    return new BoundedMatcher<View, TextView>(TextView.class) {
-      private String resourceName = null;
-      private String expectedText = null;
-
-      @Override
-      public void describeTo(Description description) {
-        description.appendText("with string from resource id: ");
-        description.appendValue(resourceId);
-        if (null != resourceName) {
-          description.appendText("[");
-          description.appendText(resourceName);
-          description.appendText("]");
-        }
-        if (null != expectedText) {
-          description.appendText(" value: ");
-          description.appendText(expectedText);
-        }
-      }
-
-      @Override
-      public boolean matchesSafely(TextView textView) {
-        if (null == expectedText) {
-          try {
-            expectedText = textView.getResources().getString(resourceId);
-            resourceName = textView.getResources().getResourceEntryName(resourceId);
-          } catch (Resources.NotFoundException ignored) {
-            /* view could be from a context unaware of the resource id. */
-          }
-        }
-        if (null != expectedText) {
-          return expectedText.equals(textView.getText());
-        } else {
-          return false;
-        }
-      }
-    };
+  public static Matcher<View> withText(int resourceId) {
+      return withCharSequence(resourceId, TextViewMethod.GET_TEXT);
   }
 
-  /**
+    private static Matcher<View> withCharSequence(final int resourceId, final TextViewMethod method) {
+        return new BoundedMatcher<View, TextView>(TextView.class) {
+            private String resourceName = null;
+            private String expectedText = null;
+
+            public void describeTo(Description description) {
+                description.appendText("with string from resource id: ");
+                description.appendValue(Integer.valueOf(resourceId));
+                if(null != this.resourceName) {
+                    description.appendText("[");
+                    description.appendText(this.resourceName);
+                    description.appendText("]");
+                }
+
+                if(null != this.expectedText) {
+                    description.appendText(" value: ");
+                    description.appendText(this.expectedText);
+                }
+
+            }
+
+            public boolean matchesSafely(TextView textView) {
+                if(null == this.expectedText) {
+                    try {
+                        this.expectedText = textView.getResources().getString(resourceId);
+                        this.resourceName = textView.getResources().getResourceEntryName(resourceId);
+                    } catch (NotFoundException var3) {
+                        ;
+                    }
+                }
+
+                CharSequence actualText = null;
+                switch(method) {
+                    case GET_TEXT:
+                        actualText = textView.getText();
+                        break;
+                    case GET_HINT:
+                        actualText = textView.getHint();
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected TextView method: " + method.toString());
+                }
+
+                return null != this.expectedText && null != actualText?this.expectedText.equals(actualText.toString()):false;
+            }
+        };
+    }
+
+    public static Matcher<View> withHint(String hintText) {
+        Preconditions.checkNotNull(hintText);
+        return withHint(Matchers.is(hintText));
+    }
+
+    public static Matcher<View> withHint(final Matcher<String> stringMatcher) {
+        Preconditions.checkNotNull(stringMatcher);
+        return new BoundedMatcher<View, TextView>(TextView.class) {
+            public void describeTo(Description description) {
+                description.appendText("with hint: ");
+                stringMatcher.describeTo(description);
+            }
+
+            public boolean matchesSafely(TextView textView) {
+                return stringMatcher.matches(textView.getHint());
+            }
+        };
+    }
+
+    public static Matcher<View> withHint(int resourceId) {
+        return withCharSequence(resourceId, ViewMatchers.TextViewMethod.GET_HINT);
+    }
+
+
+    /**
    * Returns a matcher that accepts if and only if the view is a CompoundButton (or subtype of) and
    * is in checked state.
    */
@@ -611,7 +693,7 @@ public final class ViewMatchers {
   /**
    * Enumerates the possible list of values for View.getVisibility().
    */
-  public enum Visibility {
+  public static enum Visibility {
     VISIBLE(View.VISIBLE), INVISIBLE(View.INVISIBLE), GONE(View.GONE);
 
     private final int value;
@@ -624,6 +706,21 @@ public final class ViewMatchers {
       return value;
     }
   }
+
+    private static enum TextViewMethod {
+        GET_TEXT(0),
+        GET_HINT(1);
+
+        private final int value;
+
+        private TextViewMethod(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
 
    /**
    * A matcher that accepts a view if and only if the view's parent is accepted by the provided
@@ -756,6 +853,18 @@ public final class ViewMatchers {
     };
   }
 
+    public static Matcher<View> hasLinks() {
+        return new BoundedMatcher<View, TextView>(TextView.class) {
+            public void describeTo(Description description) {
+                description.appendText("has links");
+            }
+
+            public boolean matchesSafely(TextView textView) {
+                return textView.getUrls().length > 0;
+            }
+        };
+    }
+
   /**
    * A replacement for MatcherAssert.assertThat that renders View objects nicely.
    *
@@ -781,7 +890,7 @@ public final class ViewMatchers {
           .appendDescriptionOf(matcher)
           .appendText("\n     Got: ");
       if (actual instanceof View) {
-        description.appendValue(HumanReadables.describe((View) actual));
+        description.appendValue(org.djodjo.tarator.util.HumanReadables.describe((View) actual));
       } else {
         description.appendValue(actual);
       }
@@ -789,5 +898,71 @@ public final class ViewMatchers {
       throw new AssertionFailedError(description.toString());
     }
   }
+
+    public static Matcher<View> withSpinnerText(final int resourceId) {
+        return new BoundedMatcher<View, Spinner>(Spinner.class) {
+            private String resourceName = null;
+            private String expectedText = null;
+
+            public void describeTo(Description description) {
+                description.appendText("with string from resource id: ");
+                description.appendValue(Integer.valueOf(resourceId));
+                if(null != this.resourceName) {
+                    description.appendText("[");
+                    description.appendText(this.resourceName);
+                    description.appendText("]");
+                }
+
+                if(null != this.expectedText) {
+                    description.appendText(" value: ");
+                    description.appendText(this.expectedText);
+                }
+
+            }
+
+            public boolean matchesSafely(Spinner spinner) {
+                if(null == this.expectedText) {
+                    try {
+                        this.expectedText = spinner.getResources().getString(resourceId);
+                        this.resourceName = spinner.getResources().getResourceEntryName(resourceId);
+                    } catch (NotFoundException var3) {
+                        ;
+                    }
+                }
+
+                return null != this.expectedText?this.expectedText.equals(spinner.getSelectedItem().toString()):false;
+            }
+        };
+    }
+
+    public static Matcher<View> withSpinnerText(final Matcher<String> stringMatcher) {
+        Preconditions.checkNotNull(stringMatcher);
+        return new BoundedMatcher<View, Spinner>(Spinner.class) {
+            public void describeTo(Description description) {
+                description.appendText("with text: ");
+                stringMatcher.describeTo(description);
+            }
+
+            public boolean matchesSafely(Spinner spinner) {
+                return stringMatcher.matches(spinner.getSelectedItem().toString());
+            }
+        };
+    }
+
+    public static Matcher<View> withSpinnerText(String text) {
+        return withSpinnerText(Matchers.is(text));
+    }
+
+    public static Matcher<View> isJavascriptEnabled() {
+        return new BoundedMatcher<View, WebView>(WebView.class) {
+            public void describeTo(Description description) {
+                description.appendText("WebView with JS enabled");
+            }
+
+            public boolean matchesSafely(WebView webView) {
+                return webView.getSettings().getJavaScriptEnabled();
+            }
+        };
+    }
 }
 

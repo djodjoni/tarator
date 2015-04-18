@@ -1,5 +1,6 @@
 package org.djodjo.tarator.action;
 
+import android.graphics.Rect;
 import android.view.View;
 
 /**
@@ -60,7 +61,26 @@ public enum GeneralLocation implements CoordinatesProvider {
     public float[] calculateCoordinates(View view) {
       return getCoordinates(view, Position.END, Position.END);
     }
+  },
+  VISIBLE_CENTER {
+    public float[] calculateCoordinates(View view) {
+      return GeneralLocation.getCoordinatesOfVisiblePart(view, GeneralLocation.Position.MIDDLE, GeneralLocation.Position.MIDDLE);
+    }
   };
+
+  private GeneralLocation() {
+  }
+
+  static CoordinatesProvider translate(final CoordinatesProvider coords, final float dx, final float dy) {
+    return new CoordinatesProvider() {
+      public float[] calculateCoordinates(View view) {
+        float[] xy = coords.calculateCoordinates(view);
+        xy[0] += dx * (float)view.getWidth();
+        xy[1] += dy * (float)view.getHeight();
+        return xy;
+      }
+    };
+  }
 
   private static float[] getCoordinates(View view, Position vertical, Position horizontal) {
     final int[] xy = new int[2];
@@ -68,6 +88,17 @@ public enum GeneralLocation implements CoordinatesProvider {
     final float x = horizontal.getPosition(xy[0], view.getWidth());
     final float y = vertical.getPosition(xy[1], view.getHeight());
     float[] coordinates = {x, y};
+    return coordinates;
+  }
+
+  private static float[] getCoordinatesOfVisiblePart(View view, GeneralLocation.Position vertical, GeneralLocation.Position horizontal) {
+    int[] xy = new int[2];
+    view.getLocationOnScreen(xy);
+    Rect visibleParts = new Rect();
+    view.getGlobalVisibleRect(visibleParts);
+    final float x = horizontal.getPosition(xy[0], visibleParts.width());
+    final float y = vertical.getPosition(xy[1], visibleParts.height());
+    float[] coordinates = new float[]{x, y};
     return coordinates;
   }
 
@@ -81,13 +112,13 @@ public enum GeneralLocation implements CoordinatesProvider {
     MIDDLE {
     @Override
       public float getPosition(int viewPos, int viewLength) {
-        return viewPos + (viewLength / 2.0f);
+        return viewPos + ((float)(viewLength - 1) / 2.0f);
       }
     },
     END {
     @Override
       public float getPosition(int viewPos, int viewLength) {
-        return viewPos + viewLength;
+        return (float)(viewPos + viewLength - 1);
       }
     };
 
