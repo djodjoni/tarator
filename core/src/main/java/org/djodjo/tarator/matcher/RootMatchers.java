@@ -14,6 +14,7 @@ import org.djodjo.tarator.NoActivityResumedException;
 import org.djodjo.tarator.Root;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 
 import java.util.Collection;
@@ -114,6 +115,17 @@ public final class RootMatchers {
                     }
                 }
                 return false;
+            }
+        };
+    }
+    public static Matcher<Root> isPlatformPopup() {
+        return new TypeSafeMatcher<Root>() {
+            public boolean matchesSafely(Root item) {
+                return RootMatchers.withDecorView(ViewMatchers.withClassName(Matchers.is("android.widget.PopupWindow$PopupViewContainer"))).matches(item);
+            }
+
+            public void describeTo(Description description) {
+                description.appendText("with decor view of type PopupWindow$PopupViewContainer");
             }
         };
     }

@@ -37,7 +37,6 @@ dependencies {
     compile 'com.google.guava:guava:18.0'
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'com.google.code.findbugs:jsr305:1.3.9'
-    compile files('libs/espresso.jar')
 }
 
 apply from: 'https://raw.githubusercontent.com/djodjoni/gradle-mvn-push/master/gradle-mvn-push-android.gradle'
