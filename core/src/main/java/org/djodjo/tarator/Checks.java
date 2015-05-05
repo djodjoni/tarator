@@ -2,7 +2,7 @@ package org.djodjo.tarator;
 
 import javax.annotation.Nullable;
 
-final class Checks {
+public final class Checks {
     private Checks() {
     }
 
