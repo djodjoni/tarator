@@ -3,7 +3,7 @@ package org.djodjo.tarator.action;
 import android.view.View;
 import android.widget.EditText;
 
-import com.android.support.test.deps.guava.base.Preconditions;
+import com.google.common.base.Preconditions;
 
 import org.djodjo.tarator.UiController;
 import org.djodjo.tarator.ViewAction;

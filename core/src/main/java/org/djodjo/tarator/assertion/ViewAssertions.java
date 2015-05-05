@@ -3,7 +3,6 @@ package org.djodjo.tarator.assertion;
 import android.util.Log;
 import android.view.View;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -117,9 +116,9 @@ public final class ViewAssertions {
 
         if (nonMatchingViews.size() > 0) {
           String errorMessage = HumanReadables.getViewHierarchyErrorMessage(rootView,
-              Optional.of(nonMatchingViews),
+              nonMatchingViews,
               String.format("At least one view did not match the required matcher: %s", matcher),
-              Optional.of("****DOES NOT MATCH****"));
+              "****DOES NOT MATCH****");
           throw new AssertionFailedError(errorMessage);
         }
       }

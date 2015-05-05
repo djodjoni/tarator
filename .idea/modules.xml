@@ -9,6 +9,7 @@
       <module fileurl="file://$PROJECT_DIR$/runner/runner.iml" filepath="$PROJECT_DIR$/runner/runner.iml" />
       <module fileurl="file://$PROJECT_DIR$/support-v4/support-v4.iml" filepath="$PROJECT_DIR$/support-v4/support-v4.iml" />
       <module fileurl="file://$PROJECT_DIR$/support-v4/support-v4.iml" filepath="$PROJECT_DIR$/support-v4/support-v4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/support-v7/support-v7.iml" filepath="$PROJECT_DIR$/support-v7/support-v7.iml" />
       <module fileurl="file://$PROJECT_DIR$/tarator.iml" filepath="$PROJECT_DIR$/tarator.iml" />
       <module fileurl="file://$PROJECT_DIR$/testapp/testapp.iml" filepath="$PROJECT_DIR$/testapp/testapp.iml" />
       <module fileurl="file://$PROJECT_DIR$/testapp/testapp.iml" filepath="$PROJECT_DIR$/testapp/testapp.iml" />

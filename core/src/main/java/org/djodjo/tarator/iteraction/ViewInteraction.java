@@ -4,6 +4,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
+import com.google.common.base.Preconditions;
+
 import org.djodjo.tarator.FailureHandler;
 import org.djodjo.tarator.NoMatchingViewException;
 import org.djodjo.tarator.PerformException;
@@ -45,7 +47,7 @@ public class ViewInteraction {
   protected final UiController uiController;
   protected final ViewFinder viewFinder;
   protected final Executor mainThreadExecutor;
-  protected final FailureHandler failureHandler;
+  protected volatile FailureHandler failureHandler;
   protected final Matcher<View> viewMatcher;
   protected final AtomicReference<Matcher<Root>> rootMatcherRef;
 
@@ -82,10 +84,15 @@ public class ViewInteraction {
   }
 
 
+  public ViewInteraction withFailureHandler(FailureHandler failureHandler) {
+    this.failureHandler = (FailureHandler) Preconditions.checkNotNull(failureHandler);
+    return this;
+  }
+
   /**
    * Makes this ViewInteraction scoped to the root selected by the given root matcher.
    */
-  public <T extends ViewInteraction> T inRoot(Matcher<Root> rootMatcher) {
+  public  <T extends ViewInteraction> T inRoot(Matcher<Root> rootMatcher) {
     this.rootMatcherRef.set(checkNotNull(rootMatcher));
     return (T)this;
   }

@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.google.common.collect.ImmutableList;
+
 import org.djodjo.tarator.action.ViewActions;
 import org.djodjo.tarator.base.BaseLayerModule;
 import org.djodjo.tarator.base.IdlingResourceRegistry;
@@ -107,8 +109,14 @@ public final class Tarator {
     IdlingResourceRegistry registry = taratorGraph().get(IdlingResourceRegistry.class);
     for (IdlingResource resource : resources) {
       checkNotNull(resource.getName(), "IdlingResource.getName() should not be null");
-      registry.register(resource);
+      registry.registerResources(ImmutableList.copyOf(resources));
     }
+  }
+
+  public static boolean unregisterIdlingResources(IdlingResource... resources) {
+    checkNotNull(resources);
+    IdlingResourceRegistry registry = (IdlingResourceRegistry)taratorGraph().get(IdlingResourceRegistry.class);
+    return registry.unregisterResources(ImmutableList.copyOf(resources));
   }
 
   /**
