@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Tarator</string>
+    <string name="app_name">Tarator Examples</string>
 
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
@@ -11,4 +11,6 @@
     <string name="action_example">Example action</string>
 
     <string name="action_settings">Settings</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
