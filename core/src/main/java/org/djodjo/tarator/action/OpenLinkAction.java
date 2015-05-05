@@ -7,8 +7,8 @@ import android.text.style.URLSpan;
 import android.view.View;
 import android.widget.TextView;
 
-import com.android.support.test.deps.guava.base.Preconditions;
-import com.android.support.test.deps.guava.collect.Lists;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import org.djodjo.tarator.PerformException.Builder;
 import org.djodjo.tarator.UiController;

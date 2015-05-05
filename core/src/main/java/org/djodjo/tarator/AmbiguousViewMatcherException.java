@@ -2,14 +2,12 @@ package org.djodjo.tarator;
 
 import android.view.View;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 
 import org.djodjo.tarator.util.HumanReadables;
 import org.hamcrest.Matcher;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -58,9 +56,9 @@ public final class AmbiguousViewMatcherException extends RuntimeException
       ImmutableSet<View> ambiguousViews =
         ImmutableSet.<View>builder().add(builder.view1, builder.view2).add(builder.others).build();
       errorMessage = HumanReadables.getViewHierarchyErrorMessage(builder.rootView,
-          Optional.of((List<View>) new ArrayList<View>(ambiguousViews)),
+          new ArrayList<View>(ambiguousViews),
           String.format("'%s' matches multiple views in the hierarchy.", builder.viewMatcher),
-          Optional.of("****MATCHES****"));
+          "****MATCHES****");
     } else {
       errorMessage = String.format("Multiple Ambiguous Views found for matcher %s",
           builder.viewMatcher);

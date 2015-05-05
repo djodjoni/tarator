@@ -2,6 +2,7 @@ package org.djodjo.tarator.matcher;
 
 
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 
 import com.google.common.base.Preconditions;
 
@@ -252,44 +253,59 @@ public final class CursorMatchers {
         private final Matcher<String> columnNameMatcher;
         private final Matcher<?> valueMatcher;
         private final CursorMatchers.MatcherApplier applier;
+        private boolean checkColumns;
 
         private CursorMatcher(int columnIndex, Matcher<?> valueMatcher, CursorMatchers.MatcherApplier applier) {
             super(Cursor.class);
+            this.checkColumns = true;
             Preconditions.checkArgument(columnIndex >= 0);
             this.columnIndex = columnIndex;
-            this.valueMatcher = (Matcher) Preconditions.checkNotNull(valueMatcher);
-            this.applier = (CursorMatchers.MatcherApplier) Preconditions.checkNotNull(applier);
+            this.valueMatcher = (Matcher)Preconditions.checkNotNull(valueMatcher);
+            this.applier = (CursorMatchers.MatcherApplier)Preconditions.checkNotNull(applier);
             this.columnNameMatcher = null;
         }
 
         private CursorMatcher(Matcher<String> columnPicker, Matcher<?> valueMatcher, CursorMatchers.MatcherApplier applier) {
             super(Cursor.class);
-            this.columnNameMatcher = (Matcher) Preconditions.checkNotNull(columnPicker);
-            this.valueMatcher = (Matcher) Preconditions.checkNotNull(valueMatcher);
-            this.applier = (CursorMatchers.MatcherApplier) Preconditions.checkNotNull(applier);
+            this.checkColumns = true;
+            this.columnNameMatcher = (Matcher)Preconditions.checkNotNull(columnPicker);
+            this.valueMatcher = (Matcher)Preconditions.checkNotNull(valueMatcher);
+            this.applier = (CursorMatchers.MatcherApplier)Preconditions.checkNotNull(applier);
             this.columnIndex = -3;
         }
 
         public boolean matchesSafely(Cursor cursor) {
             int chosenColumn = this.columnIndex;
-            if (chosenColumn < 0) {
+            if(chosenColumn < 0) {
                 chosenColumn = CursorMatchers.findColumnIndex(this.columnNameMatcher, cursor);
-                if (chosenColumn < 0) {
-                    StringDescription description = new StringDescription();
-                    this.columnNameMatcher.describeTo(description);
-                    if (chosenColumn == -1) {
-                        throw new IllegalArgumentException("Couldn\'t find column in " + Arrays.asList(cursor.getColumnNames()) + " matching " + description.toString());
+                if(chosenColumn < 0) {
+                    StringDescription e = new StringDescription();
+                    this.columnNameMatcher.describeTo(e);
+                    if(chosenColumn == -1) {
+                        if(this.checkColumns) {
+                            throw new IllegalArgumentException("Couldn\'t find column in " + Arrays.asList(cursor.getColumnNames()) + " matching " + e.toString());
+                        }
+
+                        return false;
                     }
 
-                    if (chosenColumn == -2) {
-                        throw new IllegalArgumentException("Multiple columns in " + Arrays.asList(cursor.getColumnNames()) + " match " + description.toString());
+                    if(chosenColumn == -2) {
+                        throw new IllegalArgumentException("Multiple columns in " + Arrays.asList(cursor.getColumnNames()) + " match " + e.toString());
                     }
 
                     throw new IllegalArgumentException("Couldn\'t find column in " + Arrays.asList(cursor.getColumnNames()));
                 }
             }
 
-            return this.applier.apply(cursor, chosenColumn, this.valueMatcher);
+            try {
+                return this.applier.apply(cursor, chosenColumn, this.valueMatcher);
+            } catch (CursorIndexOutOfBoundsException var4) {
+                if(this.checkColumns) {
+                    throw new IllegalArgumentException("Column index is invalid", var4);
+                } else {
+                    return false;
+                }
+            }
         }
 
         public void describeTo(Description description) {

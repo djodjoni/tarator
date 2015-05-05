@@ -5,6 +5,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import org.djodjo.tarator.IdlingPolicies;
@@ -13,7 +15,12 @@ import org.djodjo.tarator.IdlingResource;
 import org.djodjo.tarator.IdlingResource.ResourceCallback;
 
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -58,50 +65,98 @@ public final class IdlingResourceRegistry {
 
   @Inject
   public IdlingResourceRegistry(Looper looper) {
+    this.idleNotificationCallback = NO_OP_CALLBACK;
     this.looper = looper;
     this.dispatcher = new Dispatcher();
     this.handler = new Handler(looper, dispatcher);
   }
 
   /**
-   * Registers the given resource.
+   * Registers the given resources.
    */
-  public void register(final IdlingResource resource) {
-    checkNotNull(resource);
-    if (Looper.myLooper() != looper) {
-      handler.post(new Runnable() {
-        @Override
-        public void run() {
-          register(resource);
+  public boolean registerResources(final List<? extends IdlingResource> resourceList) {
+    if(Looper.myLooper() != this.looper) {
+      return ((Boolean)this.runSynchronouslyOnMainThread(new Callable() {
+        public Boolean call() {
+          return Boolean.valueOf(IdlingResourceRegistry.this.registerResources(resourceList));
         }
-      });
-    } else {      
-      for (IdlingResource oldResource : resources) {
-        if (resource.getName().equals(oldResource.getName())) {
-          // This does not throw an error to avoid leaving tests that register resource in test
-          // setup in an undeterministic state (we cannot assume that everyone clears vm state
-          // between each test run)
-          Log.e(TAG, String.format("Attempted to register resource with same names:" +
-                          " %s. R1: %s R2: %s.\nDuplicate resource registration will be ignored.",
-                  resource.getName(), resource, oldResource
-          ));
-          return;
+      })).booleanValue();
+    } else {
+      boolean allRegisteredSuccesfully = true;
+      Iterator i$ = resourceList.iterator();
+
+      while(i$.hasNext()) {
+        IdlingResource resource = (IdlingResource)i$.next();
+        Preconditions.checkNotNull(resource.getName(), "IdlingResource.getName() should not be null");
+        boolean duplicate = false;
+        Iterator position = this.resources.iterator();
+
+        while(true) {
+          if(position.hasNext()) {
+            IdlingResource oldResource = (IdlingResource)position.next();
+            if(!resource.getName().equals(oldResource.getName())) {
+              continue;
+            }
+
+            Log.e(TAG, String.format("Attempted to register resource with same names: %s. R1: %s R2: %s.\nDuplicate resource registration will be ignored.", new Object[]{resource.getName(), resource, oldResource}));
+            duplicate = true;
+          }
+
+          if(!duplicate) {
+            this.resources.add(resource);
+            int position1 = this.resources.size() - 1;
+            this.registerToIdleCallback(resource, position1);
+            this.idleState.set(position1, resource.isIdleNow());
+          } else {
+            allRegisteredSuccesfully = false;
+          }
+          break;
         }
       }
-      resources.add(resource);
-      final int position = resources.size() - 1;
-      registerToIdleCallback(resource, position);
-      idleState.set(position, resource.isIdleNow());
+
+      return allRegisteredSuccesfully;
     }
   }
+
+  public boolean unregisterResources(final List<? extends IdlingResource> resourceList) {
+    if(Looper.myLooper() != this.looper) {
+      return ((Boolean)this.runSynchronouslyOnMainThread(new Callable() {
+        public Boolean call() {
+          return Boolean.valueOf(IdlingResourceRegistry.this.unregisterResources(resourceList));
+        }
+      })).booleanValue();
+    } else {
+      boolean allUnregisteredSuccesfully = true;
+      Iterator i$ = resourceList.iterator();
+
+      while(i$.hasNext()) {
+        IdlingResource resource = (IdlingResource)i$.next();
+        int resourceIndex = this.resources.indexOf(resource);
+        if(resourceIndex != -1) {
+          for(int i = resourceIndex; i < this.resources.size(); ++i) {
+            this.idleState.set(i, this.idleState.get(i + 1));
+          }
+
+          this.resources.remove(resourceIndex);
+        } else {
+          allUnregisteredSuccesfully = false;
+          Log.e(TAG, String.format("Attempted to unregister resource that is not registered: \'%s\'. Resource list: %s", new Object[]{resource.getName(), this.resources}));
+        }
+      }
+
+      return allUnregisteredSuccesfully;
+    }
+  }
+
+
 
   public void registerLooper(Looper looper, boolean considerWaitIdle) {
     checkNotNull(looper);
     checkArgument(Looper.getMainLooper() != looper, "Not intended for use with main looper!");
-    register(new LooperIdlingResource(looper, considerWaitIdle));
+    registerResources(Lists.newArrayList(new LooperIdlingResource[]{new LooperIdlingResource(looper, considerWaitIdle)}));
   }
 
-  private void registerToIdleCallback(IdlingResource resource, final int position) {
+  private void registerToIdleCallback(final IdlingResource resource, final int position) {
     resource.registerIdleTransitionCallback(new ResourceCallback() {
       @Override
       public void onTransitionToIdle() {
@@ -110,6 +165,14 @@ public final class IdlingResourceRegistry {
         handler.sendMessage(m);
       }
     });
+  }
+
+  public List<IdlingResource> getResources() {
+    return (List)(Looper.myLooper() != this.looper?(List)this.runSynchronouslyOnMainThread(new Callable() {
+      public List<IdlingResource> call() {
+        return IdlingResourceRegistry.this.getResources();
+      }
+    }): ImmutableList.copyOf(this.resources));
   }
 
   boolean allResourcesAreIdle() {
@@ -143,6 +206,21 @@ public final class IdlingResourceRegistry {
 
   void cancelIdleMonitor() {
     dispatcher.deregister();
+  }
+
+  private <T> T runSynchronouslyOnMainThread(Callable<T> task) {
+    FutureTask futureTask = new FutureTask(task);
+    this.handler.post(futureTask);
+
+    try {
+      return (T) futureTask.get();
+    } catch (CancellationException var4) {
+      throw new RuntimeException(var4);
+    } catch (ExecutionException var5) {
+      throw new RuntimeException(var5);
+    } catch (InterruptedException var6) {
+      throw new RuntimeException(var6);
+    }
   }
 
   private void scheduleTimeoutMessages() {
@@ -210,13 +288,20 @@ public final class IdlingResourceRegistry {
     }
 
     private void handleResourceIdled(Message m) {
-      idleState.set(m.arg1, true);
-      if (idleState.cardinality() == resources.size()) {
-        try {
-          idleNotificationCallback.allResourcesIdle();
-        } finally {
-          deregister();
+      int position = m.arg1;
+      IdlingResource resource = (IdlingResource)m.obj;
+      if(position < IdlingResourceRegistry.this.resources.size() && IdlingResourceRegistry.this.resources.get(position) == resource) {
+        IdlingResourceRegistry.this.idleState.set(position, true);
+        if(IdlingResourceRegistry.this.idleState.cardinality() == IdlingResourceRegistry.this.resources.size()) {
+          try {
+            IdlingResourceRegistry.this.idleNotificationCallback.allResourcesIdle();
+          } finally {
+            this.deregister();
+          }
         }
+
+      } else {
+        Log.i(IdlingResourceRegistry.TAG, "Ignoring message from unregistered resource: " + resource);
       }
     }
 

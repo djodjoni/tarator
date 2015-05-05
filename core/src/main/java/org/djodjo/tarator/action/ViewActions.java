@@ -1,13 +1,23 @@
 package org.djodjo.tarator.action;
 
 import android.net.Uri;
+import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
+import android.view.View;
 
-import com.android.support.test.deps.guava.base.Preconditions;
+import com.google.common.base.Preconditions;
 
+import org.djodjo.tarator.NoMatchingViewException;
+import org.djodjo.tarator.UiController;
 import org.djodjo.tarator.ViewAction;
+import org.djodjo.tarator.ViewAssertion;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.annotation.Nonnull;
 
@@ -20,6 +30,69 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class ViewActions {
 
   private static final float EDGE_FUZZ_FACTOR = 0.083F;
+  private static Set<Pair<String, ViewAssertion>> globalAssertions = new CopyOnWriteArraySet();
+
+
+  public static void addGlobalAssertion(String name, ViewAssertion viewAssertion) {
+    Preconditions.checkNotNull(name);
+    Preconditions.checkNotNull(viewAssertion);
+    Pair vaPair = new Pair(name, viewAssertion);
+    Preconditions.checkArgument(!globalAssertions.contains(vaPair), "ViewAssertion with name %s is already in the global assertions!", new Object[]{name});
+    globalAssertions.add(vaPair);
+  }
+
+  public static void removeGlobalAssertion(ViewAssertion viewAssertion) {
+    boolean removed = false;
+    Iterator i$ = globalAssertions.iterator();
+
+    while(i$.hasNext()) {
+      Pair vaPair = (Pair)i$.next();
+      if(viewAssertion != null && viewAssertion.equals(vaPair.second)) {
+        removed = removed || globalAssertions.remove(vaPair);
+      }
+    }
+
+    Preconditions.checkArgument(removed, "ViewAssertion was not in global assertions!");
+  }
+
+  public static void clearGlobalAssertions() {
+    globalAssertions.clear();
+  }
+
+  public static ViewAction actionWithAssertions(final ViewAction viewAction) {
+    return globalAssertions.isEmpty()?viewAction:new ViewAction() {
+      public String getDescription() {
+        StringBuilder msg = new StringBuilder("Running view assertions[");
+        Iterator iterator = ViewActions.globalAssertions.iterator();
+
+        while(iterator.hasNext()) {
+          Pair vaPair = (Pair)iterator.next();
+          msg.append((String)vaPair.first);
+          msg.append(", ");
+        }
+
+        msg.append("] and then running: ");
+        msg.append(viewAction.getDescription());
+        return msg.toString();
+      }
+
+      public Matcher<View> getConstraints() {
+        return viewAction.getConstraints();
+      }
+
+      public void perform(UiController uic, View view) {
+        Iterator iterator = ViewActions.globalAssertions.iterator();
+
+        while(iterator.hasNext()) {
+          Pair vaPair = (Pair)iterator.next();
+          Log.i("ViewAssertion", "Asserting " + (String) vaPair.first);
+          ((ViewAssertion)vaPair.second).check(view, (NoMatchingViewException)null);
+        }
+
+        viewAction.perform(uic, view);
+      }
+    };
+  }
 
   private ViewActions() {}
 
@@ -32,7 +105,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction clearText() {
-    return new ClearTextAction();
+    return actionWithAssertions(new ClearTextAction());
   }
 
   /**
@@ -44,7 +117,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction click() {
-    return new GeneralClickAction(Tap.SINGLE, GeneralLocation.VISIBLE_CENTER, Press.FINGER);
+    return actionWithAssertions(new GeneralClickAction(Tap.SINGLE, GeneralLocation.VISIBLE_CENTER, Press.FINGER));
   }
 
   /**
@@ -82,8 +155,8 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction swipeLeft() {
-    return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.translate(GeneralLocation.CENTER_RIGHT, -EDGE_FUZZ_FACTOR, 0.0F),
-        GeneralLocation.CENTER_LEFT, Press.FINGER);
+    return actionWithAssertions(new GeneralSwipeAction(Swipe.FAST, GeneralLocation.translate(GeneralLocation.CENTER_RIGHT, -EDGE_FUZZ_FACTOR, 0.0F),
+        GeneralLocation.CENTER_LEFT, Press.FINGER));
   }
 
   /**
@@ -96,25 +169,25 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction swipeRight() {
-    return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.translate(GeneralLocation.CENTER_LEFT, EDGE_FUZZ_FACTOR, 0.0F),
-        GeneralLocation.CENTER_RIGHT, Press.FINGER);
+    return actionWithAssertions(new GeneralSwipeAction(Swipe.FAST, GeneralLocation.translate(GeneralLocation.CENTER_LEFT, EDGE_FUZZ_FACTOR, 0.0F),
+        GeneralLocation.CENTER_RIGHT, Press.FINGER));
   }
 
   public static ViewAction swipeDown() {
-    return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.translate(GeneralLocation.TOP_CENTER, 0.0F, EDGE_FUZZ_FACTOR),
-            GeneralLocation.BOTTOM_CENTER, Press.FINGER);
+    return actionWithAssertions(new GeneralSwipeAction(Swipe.FAST, GeneralLocation.translate(GeneralLocation.TOP_CENTER, 0.0F, EDGE_FUZZ_FACTOR),
+            GeneralLocation.BOTTOM_CENTER, Press.FINGER));
   }
 
   public static ViewAction swipeUp() {
-    return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.translate(GeneralLocation.BOTTOM_CENTER, 0.0F, -EDGE_FUZZ_FACTOR),
-            GeneralLocation.TOP_CENTER, Press.FINGER);
+    return actionWithAssertions(new GeneralSwipeAction(Swipe.FAST, GeneralLocation.translate(GeneralLocation.BOTTOM_CENTER, 0.0F, -EDGE_FUZZ_FACTOR),
+            GeneralLocation.TOP_CENTER, Press.FINGER));
   }
 
   /**
    * Returns an action that closes soft keyboard. If the keyboard is already closed, it is a no-op.
    */
   public static ViewAction closeSoftKeyboard() {
-    return new CloseKeyboardAction();
+    return actionWithAssertions(new CloseKeyboardAction());
   }
 
   /**
@@ -122,35 +195,35 @@ public final class ViewActions {
    * (Input Method Editor). The selected view will have its onEditorAction method called.
    */
   public static ViewAction pressImeActionButton() {
-    return new EditorAction();
+    return actionWithAssertions(new EditorAction());
   }
 
   /**
    * Returns an action that clicks the back button.
    */
   public static ViewAction pressBack() {
-    return pressKey(KeyEvent.KEYCODE_BACK);
+    return actionWithAssertions(pressKey(KeyEvent.KEYCODE_BACK));
   }
 
   /**
    * Returns an action that presses the hardware menu key.
    */
   public static ViewAction pressMenuKey() {
-    return pressKey(KeyEvent.KEYCODE_MENU);
+    return actionWithAssertions(pressKey(KeyEvent.KEYCODE_MENU));
   }
 
   /**
    * Returns an action that presses the key specified by the keyCode (eg. Keyevent.KEYCODE_BACK).
    */
   public static ViewAction pressKey(int keyCode) {
-    return new KeyEventAction(new TaratorKey.Builder().withKeyCode(keyCode).build());
+    return actionWithAssertions(new KeyEventAction(new TaratorKey.Builder().withKeyCode(keyCode).build()));
   }
 
   /**
    * Returns an action that presses the specified key with the specified modifiers.
    */
   public static ViewAction pressKey(TaratorKey key) {
-    return new KeyEventAction(key);
+    return actionWithAssertions(new KeyEventAction(key));
   }
 
   /**
@@ -162,7 +235,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction doubleClick() {
-    return new GeneralClickAction(Tap.DOUBLE, GeneralLocation.VISIBLE_CENTER, Press.FINGER);
+    return actionWithAssertions(new GeneralClickAction(Tap.DOUBLE, GeneralLocation.VISIBLE_CENTER, Press.FINGER));
   }
 
   /**
@@ -175,7 +248,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction longClick() {
-    return new GeneralClickAction(Tap.LONG, GeneralLocation.VISIBLE_CENTER, Press.FINGER);
+    return actionWithAssertions(new GeneralClickAction(Tap.LONG, GeneralLocation.VISIBLE_CENTER, Press.FINGER));
   }
 
   /**
@@ -188,7 +261,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction scrollTo() {
-    return new ScrollToAction();
+    return actionWithAssertions(new ScrollToAction());
   }
 
   /**
@@ -205,7 +278,7 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction typeTextIntoFocusedView(String stringToBeTyped) {
-    return new TypeTextAction(stringToBeTyped, false /* tapToFocus */);
+    return actionWithAssertions(new TypeTextAction(stringToBeTyped, false /* tapToFocus */));
   }
 
   /**
@@ -222,32 +295,32 @@ public final class ViewActions {
    * <ul>
    */
   public static ViewAction typeText(String stringToBeTyped) {
-    return new TypeTextAction(stringToBeTyped);
+    return actionWithAssertions(new TypeTextAction(stringToBeTyped));
   }
 
   public static ViewAction replaceText(@Nonnull String stringToBeSet) {
-    return new ReplaceTextAction(stringToBeSet);
+    return actionWithAssertions(new ReplaceTextAction(stringToBeSet));
   }
 
   public static ViewAction openLinkWithText(String linkText) {
-    return openLinkWithText(Matchers.is(linkText));
+    return actionWithAssertions(openLinkWithText(Matchers.is(linkText)));
   }
 
   public static ViewAction openLinkWithText(Matcher<String> linkTextMatcher) {
-    return openLink(linkTextMatcher, Matchers.any(Uri.class));
+    return actionWithAssertions(openLink(linkTextMatcher, Matchers.any(Uri.class)));
   }
 
   public static ViewAction openLinkWithUri(String uri) {
-    return openLinkWithUri(Matchers.is(Uri.parse(uri)));
+    return actionWithAssertions(openLinkWithUri(Matchers.is(Uri.parse(uri))));
   }
 
   public static ViewAction openLinkWithUri(Matcher<Uri> uriMatcher) {
-    return openLink(Matchers.any(String.class), uriMatcher);
+    return actionWithAssertions(openLink(Matchers.any(String.class), uriMatcher));
   }
 
   public static ViewAction openLink(Matcher<String> linkTextMatcher, Matcher<Uri> uriMatcher) {
     Preconditions.checkNotNull(linkTextMatcher);
     Preconditions.checkNotNull(uriMatcher);
-    return new OpenLinkAction(linkTextMatcher, uriMatcher);
+    return actionWithAssertions(new OpenLinkAction(linkTextMatcher, uriMatcher));
   }
 }

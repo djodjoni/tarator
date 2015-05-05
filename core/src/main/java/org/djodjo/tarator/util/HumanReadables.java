@@ -15,7 +15,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
@@ -46,13 +45,13 @@ public final class HumanReadables {
    * @return a string for human consumption.
    */
   public static String getViewHierarchyErrorMessage(View rootView,
-      final Optional<List<View>> problemViews, String errorHeader,
-      final Optional<String> problemViewSuffix) {
-    Preconditions.checkArgument(!problemViews.isPresent() || problemViewSuffix.isPresent());
+      final List<View> problemViews, String errorHeader,
+      final String problemViewSuffix) {
+    Preconditions.checkArgument(problemViews == null || problemViewSuffix != null);
     StringBuilder errorMessage = new StringBuilder(errorHeader);
-    if (problemViewSuffix.isPresent()) {
+    if (problemViewSuffix !=null) {
       errorMessage.append(
-          String.format("\nProblem views are marked with '%s' below.", problemViewSuffix.get()));
+          String.format("\nProblem views are marked with '%s' below.", problemViewSuffix));
     }
 
     errorMessage.append("\n\nView Hierarchy:\n");
@@ -62,9 +61,9 @@ public final class HumanReadables {
               @Override
               public String apply(ViewAndDistance viewAndDistance) {
                 String formatString = "+%s%s ";
-                if (problemViews.isPresent()
-                        && problemViews.get().contains(viewAndDistance.getView())) {
-                  formatString += problemViewSuffix.get();
+                if (problemViews!=null
+                        && problemViews.contains(viewAndDistance.getView())) {
+                  formatString += problemViewSuffix;
                 }
                 formatString += "\n|";
 

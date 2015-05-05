@@ -7,7 +7,6 @@ import android.view.View;
 
 import org.djodjo.tarator.IdlingResource;
 import org.djodjo.tarator.PerformException;
-import org.djodjo.tarator.Tarator;
 import org.djodjo.tarator.UiController;
 import org.djodjo.tarator.ViewAction;
 import org.hamcrest.Matcher;
@@ -18,6 +17,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 
 import static org.djodjo.tarator.Tarator.onView;
+import static org.djodjo.tarator.Tarator.registerIdlingResources;
+import static org.djodjo.tarator.Tarator.unregisterIdlingResources;
 import static org.djodjo.tarator.matcher.ViewMatchers.isAssignableFrom;
 import static org.djodjo.tarator.matcher.ViewMatchers.withId;
 import static org.djodjo.tarator.support.v4.matcher.DrawerMatchers.isClosed;
@@ -48,6 +49,7 @@ public final class DrawerActions {
     }
     onView(withId(drawerLayoutId)).perform(registerListener());
     onView(withId(drawerLayoutId)).perform(actionOpenDrawer());
+    onView(withId(drawerLayoutId)).perform(unregisterListener());
   }
 
   /**
@@ -61,6 +63,7 @@ public final class DrawerActions {
     }
     onView(withId(drawerLayoutId)).perform(registerListener());
     onView(withId(drawerLayoutId)).perform(actionCloseDrawer());
+    onView(withId(drawerLayoutId)).perform(unregisterListener());
   }
 
   /**
@@ -150,7 +153,31 @@ public final class DrawerActions {
           // listener is already registered. No need to assign.
           return;
         }
-        drawer.setDrawerListener(IdlingDrawerListener.getInstance(existingListener));
+        DrawerActions.IdlingDrawerListener instance = DrawerActions.IdlingDrawerListener.getInstance(existingListener);
+        drawer.setDrawerListener(instance);
+        registerIdlingResources(new IdlingResource[]{instance});
+      }
+    };
+  }
+
+  private static ViewAction unregisterListener() {
+    return new ViewAction() {
+      public Matcher<View> getConstraints() {
+        return isAssignableFrom(DrawerLayout.class);
+      }
+
+      public String getDescription() {
+        return "unregister idling drawer listener";
+      }
+
+      public void perform(UiController uiController, View view) {
+        DrawerLayout drawer = (DrawerLayout)view;
+        DrawerListener existingListener = DrawerActions.getDrawerListener(drawer);
+        if(existingListener instanceof DrawerActions.IdlingDrawerListener) {
+          unregisterIdlingResources(new IdlingResource[]{(IdlingResource) existingListener});
+          drawer.setDrawerListener(((DrawerActions.IdlingDrawerListener)existingListener).parentListener);
+        }
+
       }
     };
   }
@@ -190,7 +217,7 @@ public final class DrawerActions {
     private static IdlingDrawerListener getInstance(DrawerListener parentListener) {
       if (instance == null) {
         instance = new IdlingDrawerListener();
-        Tarator.registerIdlingResources(instance);
+        registerIdlingResources(instance);
       }
       instance.setParentListener(parentListener);
       return instance;
