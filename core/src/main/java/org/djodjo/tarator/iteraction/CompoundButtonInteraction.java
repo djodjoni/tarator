@@ -28,7 +28,7 @@ import javax.inject.Inject;
  * operation).
  * <p>
  */
-public final class CompoundButtonInteraction extends ViewInteraction {
+public final class CompoundButtonInteraction extends ViewInteraction<CompoundButtonAssert> {
 
   private static final String TAG = CompoundButtonInteraction.class.getSimpleName();
 

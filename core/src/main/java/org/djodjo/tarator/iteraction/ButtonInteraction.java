@@ -28,7 +28,7 @@ import javax.inject.Inject;
  * operation).
  * <p>
  */
-public final class ButtonInteraction extends ViewInteraction {
+public final class ButtonInteraction extends TextViewInteraction {
 
   private static final String TAG = ButtonInteraction.class.getSimpleName();
 

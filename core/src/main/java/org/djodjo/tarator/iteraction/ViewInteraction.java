@@ -6,6 +6,8 @@ import android.widget.AdapterView;
 
 import com.google.common.base.Preconditions;
 
+import org.assertj.android.api.view.AbstractViewAssert;
+import org.assertj.android.api.view.ViewAssert;
 import org.djodjo.tarator.FailureHandler;
 import org.djodjo.tarator.NoMatchingViewException;
 import org.djodjo.tarator.PerformException;
@@ -40,7 +42,7 @@ import static org.djodjo.tarator.matcher.ViewMatchers.isDescendantOfA;
  * operation).
  * <p>
  */
-public class ViewInteraction {
+public class ViewInteraction<A extends AbstractViewAssert> {
 
   private static final String TAG = ViewInteraction.class.getSimpleName();
 
@@ -111,23 +113,23 @@ public class ViewInteraction {
         if (!constraints.matches(targetView)) {
           // TODO(user): update this to describeMismatch once hamcrest is updated to new
           StringDescription stringDescription = new StringDescription(new StringBuilder(
-              "Action will not be performed because the target view "
-              + "does not match one or more of the following constraints:\n"));
+                  "Action will not be performed because the target view "
+                          + "does not match one or more of the following constraints:\n"));
           constraints.describeTo(stringDescription);
           stringDescription.appendText("\nTarget view: ")
-              .appendValue(HumanReadables.describe(targetView));
+                  .appendValue(HumanReadables.describe(targetView));
 
           if (viewAction instanceof ScrollToAction
-              && isDescendantOfA(isAssignableFrom((AdapterView.class))).matches(targetView)) {
+                  && isDescendantOfA(isAssignableFrom((AdapterView.class))).matches(targetView)) {
             stringDescription.appendText(
-                "\nFurther Info: ScrollToAction on a view inside an AdapterView will not work. "
-                + "Use Tarator.onData to load the view.");
+                    "\nFurther Info: ScrollToAction on a view inside an AdapterView will not work. "
+                            + "Use Tarator.onData to load the view.");
           }
           throw new PerformException.Builder()
-            .withActionDescription(viewAction.getDescription())
-            .withViewDescription(viewMatcher.toString())
-            .withCause(new RuntimeException(stringDescription.toString()))
-            .build();
+                  .withActionDescription(viewAction.getDescription())
+                  .withViewDescription(viewMatcher.toString())
+                  .withCause(new RuntimeException(stringDescription.toString()))
+                  .build();
         } else {
           viewAction.perform(uiController, targetView);
         }
@@ -171,5 +173,34 @@ public class ViewInteraction {
     } catch (ExecutionException ee) {
       failureHandler.handle(ee.getCause(), viewMatcher);
     }
+  }
+
+  public A assertThat() {
+    final ViewAssert[] va = {null};
+    runSynchronouslyOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        uiController.loopMainThreadUntilIdle();
+
+        View targetView = null;
+        NoMatchingViewException missingViewException = null;
+        try {
+          targetView = viewFinder.getView();
+        } catch (NoMatchingViewException nmve) {
+          missingViewException = nmve;
+        }
+        StringDescription description = new StringDescription();
+        description.appendText("'");
+        viewMatcher.describeTo(description);
+        if (missingViewException != null) {
+          description.appendText(String.format(
+                  "' check could not be performed because view '%s' was not found.\n", viewMatcher));
+          Log.e(TAG, description.toString());
+          throw missingViewException;
+        }
+        va[0] = new ViewAssert(targetView);
+      }
+    });
+    return (A) va[0];
   }
 }
