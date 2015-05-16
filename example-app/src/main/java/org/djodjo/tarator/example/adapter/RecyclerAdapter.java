@@ -28,6 +28,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.TextView;
 
 import org.djodjo.comm.jus.toolbox.NetworkImageView;
 import org.djodjo.json.JsonArray;
@@ -69,6 +70,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
        // private final TextView textView;
 
        public final NetworkImageView niv ;
+        public final TextView txt1;
+        public final TextView txt2;
+        public final TextView txt3;
+        public final TextView txt4;
 
         public ViewHolder(View v) {
             super(v);
@@ -80,6 +85,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
                 }
             });
             niv = (NetworkImageView) v.findViewById(R.id.img1);
+            txt1 = (TextView)v.findViewById(R.id.txt1);
+            txt2 = (TextView)v.findViewById(R.id.txt2);
+            txt3 = (TextView)v.findViewById(R.id.txt3);
+            txt4 = (TextView)v.findViewById(R.id.txt4);
           //  textView = (TextView) v.findViewById(R.id.textView);
         }
 
@@ -123,6 +132,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         // Get element from your dataset at this position and replace the contents of the view
         // with that element
         viewHolder.niv.setImageUrl(jarr.get(position).asJsonObject().getString("pic"), MyJus.getImageLoader());
+        viewHolder.txt1.setText("title");
+        viewHolder.txt2.setText("pos: " + position);
 
         /// COOL ANIM
         View v = (View) viewHolder.niv.getParent().getParent();
@@ -163,6 +174,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     @Override
     public int getItemViewType(int position) {
-        return 0;
+        return position%2;
     }
 }

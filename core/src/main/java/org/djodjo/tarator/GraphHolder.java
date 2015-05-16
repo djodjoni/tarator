@@ -27,7 +27,7 @@ public final class GraphHolder {
     this.graph = checkNotNull(graph);
   }
 
-  static ObjectGraph graph() {
+  public static ObjectGraph graph() {
     GraphHolder instanceRef = instance.get();
     if (null == instanceRef) {
       instanceRef = new GraphHolder(ObjectGraph.create(TaratorModule.class));

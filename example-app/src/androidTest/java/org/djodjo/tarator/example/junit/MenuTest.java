@@ -12,9 +12,12 @@ import static org.djodjo.tarator.Tarator.onTextView;
 import static org.djodjo.tarator.Tarator.onView;
 import static org.djodjo.tarator.action.ViewActions.click;
 import static org.djodjo.tarator.assertion.ViewAssertions.matches;
+import static org.djodjo.tarator.matcher.ViewMatchers.hasDescendant;
 import static org.djodjo.tarator.matcher.ViewMatchers.isDisplayed;
 import static org.djodjo.tarator.matcher.ViewMatchers.withId;
 import static org.djodjo.tarator.matcher.ViewMatchers.withText;
+import static org.djodjo.tarator.support.v7.Tarator.onRecyclerView;
+import static org.djodjo.tarator.support.v7.matcher.ViewHolderMatchers.itemViewMatcher;
 
 public class MenuTest extends BaseActivityTest {
 
@@ -41,7 +44,13 @@ public class MenuTest extends BaseActivityTest {
 
         onView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section1))).perform(click());
         onView(withId(R.id.list_images))
-                .perform(RecyclerViewActions.scrollToPosition(32))
+                .perform(RecyclerViewActions.smoothScrollToPosition(32));
+        Thread.sleep(3000);
+        onRecyclerView(withId(R.id.list_images)).onViewHolderAtPosition(41).assertThat().hasItemViewType(1);
+        onRecyclerView(withId(R.id.list_images)).onViewHolderAtPosition(64).assertThat().hasItemViewType(0);
+        onRecyclerView(withId(R.id.list_images)).onViewHolderAtPosition(75).onSubView(withText("title")).check(matches(isDisplayed())).assertThat().isVisible();
+        onRecyclerView(withId(R.id.list_images)).onViewHolder(itemViewMatcher(hasDescendant(withText("pos: " + 83)))).onSubView(withText("title")).check(matches(isDisplayed())).assertThat().isVisible();
+        //   .<RecyclerViewInteraction>perform(RecyclerViewActions.smoothScrollToPosition(64));
 
         //        .perform(RecyclerViewActions.actionOnItemAtPosition(32, ViewActions.click()))
         ;

@@ -111,7 +111,7 @@ public class DataInteraction {
    *
    * @return an {@link ViewInteraction} for more assertions or actions.
    */
-  public ViewInteraction perform(ViewAction... actions) {
+  public AbstractViewInteraction perform(ViewAction... actions) {
      AdapterDataLoaderAction adapterDataLoaderAction = load();
 
     return onView(makeTargetMatcher(adapterDataLoaderAction))
@@ -124,7 +124,7 @@ public class DataInteraction {
    *
    * @return an {@link ViewInteraction} for more assertions or actions.
    */
-  public ViewInteraction check(ViewAssertion assertion) {
+  public AbstractViewInteraction check(ViewAssertion assertion) {
      AdapterDataLoaderAction adapterDataLoaderAction = load();
 
     return onView(makeTargetMatcher(adapterDataLoaderAction))

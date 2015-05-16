@@ -28,7 +28,7 @@ import javax.inject.Inject;
  * operation).
  * <p>
  */
-public class TextViewInteraction extends ViewInteraction<TextViewAssert> {
+public class TextViewInteraction extends AbstractViewInteraction<TextViewAssert> {
 
   private static final String TAG = TextViewInteraction.class.getSimpleName();
 
