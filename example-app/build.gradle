@@ -68,8 +68,8 @@ dependencies {
     androidTestCompile project(':support-v4')
     androidTestCompile project(':support-v7')
     androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
-    //androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
-    //   compile 'com.android.support.test.espresso:espresso-contrib:2.1'
+    //androidTestCompile 'com.android.support.test.espresso:espresso-core:2.1'
+    compile 'com.android.support.test.espresso:espresso-contrib:2.1'
     androidTestCompile(project(':core')) {
         exclude group: 'com.google.guava', module: 'guava'
     }

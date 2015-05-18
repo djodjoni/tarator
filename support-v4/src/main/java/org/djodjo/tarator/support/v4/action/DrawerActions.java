@@ -226,7 +226,7 @@ public final class DrawerActions {
     @Nullable private DrawerListener parentListener;
     private ResourceCallback callback;
     // Idle state is only accessible from main thread.
-    private boolean idle = true;
+    private volatile boolean idle = true;
 
     public void setParentListener(@Nullable DrawerListener parentListener) {
       this.parentListener = parentListener;

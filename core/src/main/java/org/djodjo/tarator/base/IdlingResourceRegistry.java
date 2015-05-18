@@ -61,7 +61,7 @@ public final class IdlingResourceRegistry {
   private final Looper looper;
   private final Handler handler;
   private final Dispatcher dispatcher;
-  private IdleNotificationCallback idleNotificationCallback = NO_OP_CALLBACK;
+  private IdleNotificationCallback idleNotificationCallback;
 
   @Inject
   public IdlingResourceRegistry(Looper looper) {
@@ -83,34 +83,30 @@ public final class IdlingResourceRegistry {
       })).booleanValue();
     } else {
       boolean allRegisteredSuccesfully = true;
-      Iterator i$ = resourceList.iterator();
+      Iterator iterator = resourceList.iterator();
 
-      while(i$.hasNext()) {
-        IdlingResource resource = (IdlingResource)i$.next();
+      while(iterator.hasNext()) {
+        IdlingResource resource = (IdlingResource)iterator.next();
         Preconditions.checkNotNull(resource.getName(), "IdlingResource.getName() should not be null");
         boolean duplicate = false;
         Iterator position = this.resources.iterator();
 
-        while(true) {
-          if(position.hasNext()) {
-            IdlingResource oldResource = (IdlingResource)position.next();
-            if(!resource.getName().equals(oldResource.getName())) {
-              continue;
-            }
-
+        while(position.hasNext()) {
+          IdlingResource oldResource = (IdlingResource)position.next();
+          if(resource.getName().equals(oldResource.getName())) {
             Log.e(TAG, String.format("Attempted to register resource with same names: %s. R1: %s R2: %s.\nDuplicate resource registration will be ignored.", new Object[]{resource.getName(), resource, oldResource}));
             duplicate = true;
+            break;
           }
+        }
 
-          if(!duplicate) {
-            this.resources.add(resource);
-            int position1 = this.resources.size() - 1;
-            this.registerToIdleCallback(resource, position1);
-            this.idleState.set(position1, resource.isIdleNow());
-          } else {
-            allRegisteredSuccesfully = false;
-          }
-          break;
+        if(!duplicate) {
+          this.resources.add(resource);
+          int position1 = this.resources.size() - 1;
+          this.registerToIdleCallback(resource, position1);
+          this.idleState.set(position1, resource.isIdleNow());
+        } else {
+          allRegisteredSuccesfully = false;
         }
       }
 
@@ -127,10 +123,10 @@ public final class IdlingResourceRegistry {
       })).booleanValue();
     } else {
       boolean allUnregisteredSuccesfully = true;
-      Iterator i$ = resourceList.iterator();
+      Iterator iterator = resourceList.iterator();
 
-      while(i$.hasNext()) {
-        IdlingResource resource = (IdlingResource)i$.next();
+      while(iterator.hasNext()) {
+        IdlingResource resource = (IdlingResource)iterator.next();
         int resourceIndex = this.resources.indexOf(resource);
         if(resourceIndex != -1) {
           for(int i = resourceIndex; i < this.resources.size(); ++i) {
@@ -162,6 +158,7 @@ public final class IdlingResourceRegistry {
       public void onTransitionToIdle() {
         Message m = handler.obtainMessage(DYNAMIC_RESOURCE_HAS_IDLED);
         m.arg1 = position;
+        m.obj = resource;
         handler.sendMessage(m);
       }
     });
@@ -182,14 +179,6 @@ public final class IdlingResourceRegistry {
       idleState.set(i, resources.get(i).isIdleNow());
     }
     return idleState.cardinality() == resources.size();
-  }
-
-  interface IdleNotificationCallback {
-    public void allResourcesIdle();
-
-    public void resourcesStillBusyWarning(List<String> busyResourceNames);
-
-    public void resourcesHaveTimedOut(List<String> busyResourceNames);
   }
 
   void notifyWhenAllResourcesAreIdle(IdleNotificationCallback callback) {
@@ -356,5 +345,13 @@ public final class IdlingResourceRegistry {
       handler.removeCallbacksAndMessages(TIMEOUT_MESSAGE_TAG);
       idleNotificationCallback = NO_OP_CALLBACK;
     }
+  }
+
+  interface IdleNotificationCallback {
+    public void allResourcesIdle();
+
+    public void resourcesStillBusyWarning(List<String> busyResourceNames);
+
+    public void resourcesHaveTimedOut(List<String> busyResourceNames);
   }
 }

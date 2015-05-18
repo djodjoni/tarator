@@ -10,12 +10,12 @@ import org.djodjo.tarator.support.v7.action.RecyclerViewActions;
 
 import static org.djodjo.tarator.Tarator.onTextView;
 import static org.djodjo.tarator.Tarator.onView;
-import static org.djodjo.tarator.action.ViewActions.click;
 import static org.djodjo.tarator.assertion.ViewAssertions.matches;
 import static org.djodjo.tarator.matcher.ViewMatchers.hasDescendant;
 import static org.djodjo.tarator.matcher.ViewMatchers.isDisplayed;
 import static org.djodjo.tarator.matcher.ViewMatchers.withId;
 import static org.djodjo.tarator.matcher.ViewMatchers.withText;
+import static org.djodjo.tarator.support.v4.action.DrawerActions.closeDrawer;
 import static org.djodjo.tarator.support.v7.Tarator.onRecyclerView;
 import static org.djodjo.tarator.support.v7.matcher.ViewHolderMatchers.itemViewMatcher;
 
@@ -42,7 +42,9 @@ public class MenuTest extends BaseActivityTest {
         //  onButton(withText(getInstrumentation().getTargetContext().getString(item))).assertThat().isNotEmpty().hasTextSize(50);
         //   Thread.sleep(2000);
 
-        onView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section1))).perform(click());
+      //  onView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section1))).perform(click());
+        closeDrawer(R.id.drawer_layout);
+
         onView(withId(R.id.list_images))
                 .perform(RecyclerViewActions.smoothScrollToPosition(32));
         Thread.sleep(3000);
