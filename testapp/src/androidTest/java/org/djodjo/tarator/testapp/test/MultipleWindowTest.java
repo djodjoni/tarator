@@ -89,7 +89,7 @@ public class MultipleWindowTest extends ActivityInstrumentationTestCase2<SendAct
 
 
     // NB: The autocompletion box is implemented with a ListView, so the preferred way
-    // to interact with it is onData(). We can use inRoot here too!
+    // to interact with it is onData(). We can use inRoot here; too!
     onView(withId(R.id.auto_complete_text_view))
         .perform(clearText())
         .perform(typeText("S"));
