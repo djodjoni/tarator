@@ -5,7 +5,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
 
 import com.google.common.base.Optional;

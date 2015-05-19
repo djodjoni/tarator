@@ -1,11 +1,24 @@
 package org.djodjo.tarator.runner;
 
 
+import android.os.Bundle;
 import android.support.test.internal.runner.tracker.UsageTracker;
 import android.support.test.internal.runner.tracker.UsageTrackerRegistry;
 import android.support.test.runner.AndroidJUnitRunner;
+import android.util.Log;
 
 public class TaratorJunitRunner extends AndroidJUnitRunner {
+
+    private static final String TAG="TaratorJunitRunner";
+    private Bundle mArguments;
+
+    @Override
+    public void onCreate(Bundle bundle)
+    {
+        Log.d(TAG, "tarator-junit-runner on Create");
+        this.mArguments = bundle;
+        super.onCreate(bundle);
+    }
 
     public void onStart() {
         super.onStart();
@@ -15,6 +28,9 @@ public class TaratorJunitRunner extends AndroidJUnitRunner {
                 UsageTrackerRegistry.registerInstance(usageTracker);
             }
         }
+    }
+    private Bundle getArguments() {
+        return this.mArguments;
     }
 
     private boolean getBooleanArgument(String tag) {

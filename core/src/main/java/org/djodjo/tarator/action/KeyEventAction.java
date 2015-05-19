@@ -1,7 +1,7 @@
 package org.djodjo.tarator.action;
 
 import android.os.SystemClock;
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.Stage;
 import android.util.Log;
 import android.view.KeyEvent;

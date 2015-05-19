@@ -2,7 +2,7 @@ package org.djodjo.tarator.matcher;
 
 import android.app.Activity;
 import android.os.IBinder;
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitor;
 import android.support.test.runner.lifecycle.Stage;
 import android.view.View;

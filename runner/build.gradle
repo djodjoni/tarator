@@ -27,7 +27,8 @@ android {
 }
 
 dependencies {
-    provided ('com.android.support.test:testing-support-lib:0.1')
+    //provided 'com.android.support.test:testing-support-lib:0.1'
+    compile 'com.android.support.test:runner:0.2'
     provided 'info.cukes:cucumber-android:1.2.2'
 }
 

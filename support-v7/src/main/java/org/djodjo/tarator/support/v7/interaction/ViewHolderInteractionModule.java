@@ -8,7 +8,6 @@ import org.djodjo.tarator.GraphHolder;
 import org.djodjo.tarator.NoMatchingViewException;
 import org.djodjo.tarator.Root;
 import org.djodjo.tarator.ViewFinder;
-import org.djodjo.tarator.base.RootViewPicker;
 import org.djodjo.tarator.matcher.RootMatchers;
 import org.hamcrest.Matcher;
 
@@ -51,12 +50,6 @@ public class ViewHolderInteractionModule {
                 return viewHolder.itemView;
             }
         };
-    }
-
-    @Provides
-    public View provideRootView(RootViewPicker rootViewPicker) {
-        // RootsOracle acts as a provider, but returning Providers is illegal, so delegate.
-        return rootViewPicker.get();
     }
 
     @Provides
