@@ -96,6 +96,26 @@ public class BaseLayerModule {
   }
 
   @Provides
+  public Recycler provideRecycler() {
+    int sdkVersion = Build.VERSION.SDK_INT;
+    if(sdkVersion > 20) {
+      return new UncheckedRecycler();
+    } else if(sdkVersion >= 19) {
+      try {
+        return new UncheckedRecycler();
+      } catch (RuntimeException var3) {
+        if(var3.getCause() != null && var3.getCause() instanceof NoSuchMethodException) {
+          return Recycler.DEFAULT_RECYCLER;
+        } else {
+          throw var3;
+        }
+      }
+    } else {
+      return Recycler.DEFAULT_RECYCLER;
+    }
+  }
+
+  @Provides
   @Singleton
   public EventInjector provideEventInjector() {
     // On API 16 and above, android uses input manager to inject events. On API < 16,

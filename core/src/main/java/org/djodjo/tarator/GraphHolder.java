@@ -58,6 +58,9 @@ public final class GraphHolder {
     injects = IdlingResourceRegistry.class
   )
   public static class TaratorModule {
+    TaratorModule() {
+
+    }
   }
 
 }

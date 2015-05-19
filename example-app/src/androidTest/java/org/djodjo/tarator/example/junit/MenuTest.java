@@ -16,6 +16,7 @@ import static org.djodjo.tarator.matcher.ViewMatchers.isDisplayed;
 import static org.djodjo.tarator.matcher.ViewMatchers.withId;
 import static org.djodjo.tarator.matcher.ViewMatchers.withText;
 import static org.djodjo.tarator.support.v4.action.DrawerActions.closeDrawer;
+import static org.djodjo.tarator.support.v4.action.DrawerActions.openDrawer;
 import static org.djodjo.tarator.support.v7.Tarator.onRecyclerView;
 import static org.djodjo.tarator.support.v7.matcher.ViewHolderMatchers.itemViewMatcher;
 
@@ -34,8 +35,8 @@ public class MenuTest extends BaseActivityTest {
     }
 
     public void testSelection() throws Exception {
-
-
+        closeDrawer(R.id.drawer_layout);
+        openDrawer(R.id.drawer_layout);
         onTextView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section1))).<TextViewInteraction>check(matches(isDisplayed())).assertThat().isVisible();
         // onTextView(withText(getInstrumentation().getTargetContext().getString(item))).check(matches(isDisplayed())).assertThat().isVisible();
 
