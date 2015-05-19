@@ -203,4 +203,8 @@ public class AbstractViewInteraction<A extends AbstractViewAssert> {
     });
     return (A) va[0];
   }
+
+  public View getView() {
+    return viewFinder.getView();
+  }
 }

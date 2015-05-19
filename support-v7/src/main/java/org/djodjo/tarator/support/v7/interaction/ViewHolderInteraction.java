@@ -52,4 +52,8 @@ public class ViewHolderInteraction
         return new RecyclerViewViewHolderAssert(viewHolder);
     }
 
+    public RecyclerView.ViewHolder getViewHolder() {
+        return this.viewHolder;
+    }
+
 }
