@@ -52,6 +52,15 @@ public class ViewHolderInteraction
         return new RecyclerViewViewHolderAssert(viewHolder);
     }
 
+    /**
+     * Get matching target ViewHolder in order to retrieve its properties.
+     * This has been deprecated from its very creation and not to be used unless completely out of
+     * solutions.
+     * Manipulating this ViewHolder out of a ViewHolderInteraction or RecyclerViewInteraction is absolutely discouraged as there are no
+     * guarantees of safe execution.
+     * @return matching target view
+     */
+    @Deprecated
     public RecyclerView.ViewHolder getViewHolder() {
         return this.viewHolder;
     }

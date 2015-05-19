@@ -204,7 +204,31 @@ public class AbstractViewInteraction<A extends AbstractViewAssert> {
     return (A) va[0];
   }
 
-  public View getView() {
-    return viewFinder.getView();
+
+  /**
+   * Get matching target view in order to retrieve view properties.
+   * This has been deprecated from its very creation and not to be used unless completely out of
+   * solutions.
+   * Manipulating this view out of a ViewInteraction is absolutely discouraged as there are no
+   * guarantees of safe execution.
+   * @return matching target view
+   */
+  @Deprecated
+  public View getTargetView() {
+    final View[] targetView = {null};
+    runSynchronouslyOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        uiController.loopMainThreadUntilIdle();
+
+        NoMatchingViewException missingViewException = null;
+        try {
+          targetView[0] = viewFinder.getView();
+        } catch (NoMatchingViewException nmve) {
+          missingViewException = nmve;
+        }
+      }
+    });
+    return targetView[0];
   }
 }
