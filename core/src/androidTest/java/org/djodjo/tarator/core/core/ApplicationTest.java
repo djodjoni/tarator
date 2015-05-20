@@ -1,4 +1,4 @@
-package cc.ardennehiking.core;
+package org.djodjo.tarator.core.core;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
