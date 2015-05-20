@@ -51,7 +51,7 @@ public class MenuTest extends BaseActivityTest {
         Thread.sleep(3000);
         onRecyclerView(withId(R.id.list_images)).onViewHolderAtPosition(41).assertThat().hasItemViewType(1);
         onRecyclerView(withId(R.id.list_images)).onViewHolderAtPosition(64).assertThat().hasItemViewType(0);
-        onRecyclerView(withId(R.id.list_images)).onViewHolderAtPosition(75).onSubView(withText("title")).check(matches(isDisplayed())).assertThat().isVisible();
+        onRecyclerView(withId(R.id.list_images)).onViewHolderAtPosition(75).onSubView(withText("title")).check(matches(withText("title"))).assertThat().isVisible();
         onRecyclerView(withId(R.id.list_images)).onViewHolder(itemViewMatcher(hasDescendant(withText("pos: " + 83)))).onSubView(withText("title")).check(matches(isDisplayed())).assertThat().isVisible();
         //   .<RecyclerViewInteraction>perform(RecyclerViewActions.smoothScrollToPosition(64));
 
