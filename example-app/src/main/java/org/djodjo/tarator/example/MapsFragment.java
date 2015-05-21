@@ -1,21 +1,25 @@
 package org.djodjo.tarator.example;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.djodjo.json.JsonArray;
+import org.djodjo.json.JsonElement;
+import org.djodjo.json.JsonObject;
 import org.djodjo.tarator.example.mock.MockData;
 
-public class MapsFragment extends Fragment {
+public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private JsonArray data;
@@ -27,14 +31,11 @@ public class MapsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                              Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.activity_maps, container, false);
-        setHasOptionsMenu(true);
-        setUpMapIfNeeded();
-
-
+        setHasOptionsMenu(false);
         return v;
     }
 
@@ -63,12 +64,8 @@ public class MapsFragment extends Fragment {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                setUpMap();
-            }
+            ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map))
+                    .getMapAsync(this);
         }
     }
 
@@ -79,6 +76,20 @@ public class MapsFragment extends Fragment {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        final LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for(JsonElement je:data) {
+            JsonObject item = je.asJsonObject();
+            LatLng latLng = new LatLng(item.getJsonArray("loc").getDouble(0), item.getJsonArray("loc").getDouble(1));
+
+            mMap.addMarker(new MarkerOptions().title(item.getString("title")).snippet(item.getString("info3")).position(latLng));
+            builder.include(latLng);
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 80));
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
+        setUpMap();
     }
 }

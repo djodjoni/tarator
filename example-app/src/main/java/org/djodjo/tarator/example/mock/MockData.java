@@ -25,13 +25,16 @@ public class MockData {
             String color = Integer.toHexString(cc);
             String color2 = Integer.toHexString((0xFFFFFF - cc));
             // String color2 = Integer.toHexString(cc2);
+            double lat = 50 + rand.nextInt(300) / 100d;
+            double lon = 4 + rand.nextInt(300) / 100d;
             res.add(
                     new JsonObject()
                             .put("pic", "http://dummyimage.com/" + picSize + "/" + color + "/" + color2)
                             .put("title", "Item - " + i)
                             .put("info", "info - " + color)
                             .put("info2", "info - " + color2)
-
+                            .put("info3", "info - " + lat + ":" + lon)
+                            .put("loc", new JsonArray().put(lat).put(lon))
             );
         }
 
