@@ -55,7 +55,9 @@ public class MainActivity extends ActionBarActivity
        Fragment frag;
         switch (position) {
             case 0: frag = ImageListFragment.newInstance(); break;
+            case 1: frag = MapsFragment.newInstance(); break;
             default: frag = BlankFragment.newInstance(); break;
+
         }
 
         fragmentManager.beginTransaction()

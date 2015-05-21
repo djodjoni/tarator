@@ -1,1 +1,1 @@
-include ':example-app', ':testapp', ':runner', ':core', ':support-v4', ':support-v7'
+include ':example-app', ':testapp', ':runner', ':core', ':support-v4', ':support-v7', ':play-services'

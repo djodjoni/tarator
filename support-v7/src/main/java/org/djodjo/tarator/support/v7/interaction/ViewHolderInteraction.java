@@ -6,11 +6,17 @@ import android.view.View;
 
 import org.assertj.android.recyclerview.v7.api.widget.RecyclerViewViewHolderAssert;
 import org.djodjo.tarator.FailureHandler;
+import org.djodjo.tarator.GraphHolder;
 import org.djodjo.tarator.Root;
 import org.djodjo.tarator.UiController;
 import org.djodjo.tarator.ViewFinder;
 import org.djodjo.tarator.base.MainThread;
 import org.djodjo.tarator.iteraction.AbstractViewInteraction;
+import org.djodjo.tarator.iteraction.ButtonInteraction;
+import org.djodjo.tarator.iteraction.CompoundButtonInteraction;
+import org.djodjo.tarator.iteraction.TextViewInteraction;
+import org.djodjo.tarator.iteraction.ViewInteraction;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
 import java.util.concurrent.Executor;
@@ -42,9 +48,45 @@ public class ViewHolderInteraction
         this.rootMatcherRef = checkNotNull(rootMatcherRef);
     }
 
-    public AbstractViewInteraction onSubView(Matcher<View> viewSubItemMatcher) {
+    public ViewInteraction onSubView(Matcher<View> viewSubItemMatcher) {
+        return GraphHolder.graph().plus(new ViewHolderViewItemInteractionModule(viewSubItemMatcher, viewHolder.itemView)).get(ViewInteraction.class);
+    }
+
+    public TextViewInteraction onSubTextView(Matcher<View> viewSubItemMatcher) {
+        return GraphHolder.graph().plus(new ViewHolderViewItemInteractionModule(viewSubItemMatcher, viewHolder.itemView)).get(TextViewInteraction.class);
+    }
+
+    public ButtonInteraction onSubButton(Matcher<View> viewSubItemMatcher) {
+        return GraphHolder.graph().plus(new ViewHolderViewItemInteractionModule(viewSubItemMatcher, viewHolder.itemView)).get(ButtonInteraction.class);
+    }
+
+    public CompoundButtonInteraction onSubCompoundButton(Matcher<View> viewSubItemMatcher) {
+        return GraphHolder.graph().plus(new ViewHolderViewItemInteractionModule(viewSubItemMatcher, viewHolder.itemView)).get(CompoundButtonInteraction.class);
+    }
+
+    public AbstractViewInteraction onViewIem() {
         AbstractViewInteraction vi = null;
-        vi = new AbstractViewInteraction(uiController, viewSubItemFinder, mainThreadExecutor, failureHandler, viewSubItemMatcher, rootMatcherRef);
+        vi = new AbstractViewInteraction(uiController, viewSubItemFinder, mainThreadExecutor, failureHandler, new Matcher<View>() {
+            @Override
+            public boolean matches(Object item) {
+                return true;
+            }
+
+            @Override
+            public void describeMismatch(Object item, Description mismatchDescription) {
+
+            }
+
+            @Override
+            public void _dont_implement_Matcher___instead_extend_BaseMatcher_() {
+
+            }
+
+            @Override
+            public void describeTo(Description description) {
+
+            }
+        }, rootMatcherRef);
         return vi;
     }
 

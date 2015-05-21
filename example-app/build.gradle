@@ -30,7 +30,6 @@ android {
 }
 
 
-
 def getInstrumentationTestRunner() {
 
     //default
@@ -69,15 +68,18 @@ dependencies {
     androidTestCompile project(':support-v7')
     //androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
     //androidTestCompile 'com.android.support.test.espresso:espresso-core:2.1'
-    compile 'com.android.support.test.espresso:espresso-contrib:2.1'
     androidTestCompile(project(':core')) {
         exclude group: 'com.google.guava', module: 'guava'
     }
-    androidTestCompile ('info.cukes:cucumber-android:1.2.2') {
+    androidTestCompile('info.cukes:cucumber-android:1.2.2') {
         exclude group: 'com.google.guava', module: 'guava'
     }
     androidTestCompile 'info.cukes:cucumber-picocontainer:1.2.2'
 
+
+
+
+    //compile 'com.android.support.test.espresso:espresso-contrib:2.1'
     compile 'com.android.support:appcompat-v7:22.1.1'
     compile 'com.android.support:recyclerview-v7:22.1.1'
     compile 'com.android.support:gridlayout-v7:22.1.1'
@@ -85,10 +87,10 @@ dependencies {
     compile 'com.android.support:cardview-v7:22.1.1'
     compile 'com.android.support:support-annotations:22.1.1'
     compile 'com.google.guava:guava:18.0'
-
-
     compile 'org.djodjo.comm:jus:0.3.3'
     compile 'org.djodjo.json:json-core:1.+'
     compile 'org.djodjo.json:json-wrapper:1.+'
+
+    compile 'com.google.android.gms:play-services:7.0.0'
 
 }
