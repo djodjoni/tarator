@@ -2,12 +2,18 @@ package org.djodjo.tarator.example.junit;
 
 
 import android.app.Activity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+
 import org.djodjo.tarator.example.MainActivity;
 import org.djodjo.tarator.example.R;
+
+import java.util.ArrayList;
 
 import static org.djodjo.tarator.Tarator.onView;
 import static org.djodjo.tarator.action.ViewActions.click;
@@ -33,12 +39,21 @@ public class GoogleMapTest extends BaseActivityTest {
     public void testSelection() throws Exception {
         openDrawer(R.id.drawer_layout);
          onView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section2))).perform(click());
-        Thread.sleep(3000);
+        Thread.sleep(5000);
         View mapContainer  = onView(withId(R.id.map)).getTargetView();
         Log.d("TT", "tt map container - " + mapContainer);
         TextureView map = (TextureView) onView(withContentDescription("Google Map")).getTargetView();
-        Log.d("TT", "tt map - " + map.getClass().getInterfaces()[0].getSuperclass());
-        Log.d("TT", "tt map - " + map.getClass().getSuperclass().getInterfaces()[1].getSuperclass());
+        Log.d("TT", "tt map - " + map.getClass());
+        Log.d("TT", "tt map - " + map.getClass().getSuperclass());
+
+
+
+        ArrayList<View> inViews =  map.getTouchables();
+
+        for( View inner : inViews) {
+            Log.d("TT", "tt inner - " + inner.getClass());
+//            Log.d("TT", "tt inner touchables - " + ((TextureView) touchable).getTouchables().get(0).getClass());
+        }
 
 //        for(int i=0;i<map.getChildCount();i++) {
 //            View marker = map.getChildAt(i);
@@ -46,8 +61,23 @@ public class GoogleMapTest extends BaseActivityTest {
 //        }
 
 
-        View marker = onView(withContentDescription("Item - 1.")).getTargetView();
-        Log.d("TT", "tt marker - " + marker);
+//        for(int i=0;i<500;i++) {
+//            onView(withContentDescription("Item - "+ i+". ")).perform(click());
+//        }
+
+        GoogleMap theMap = ((SupportMapFragment)((AppCompatActivity)act).getSupportFragmentManager()
+                .findFragmentById(R.id.container)
+                .getChildFragmentManager().findFragmentById(R.id.map)).getMap();
+        Log.d("TT", "tt the map - " + theMap);
+
+
+//        UiDevice device = UiDevice.getInstance(getInstrumentation());
+//        UiObject markerr = device.findObject(new UiSelector().descriptionContains("Item - 32").instance(1));
+//        Log.d("TT", "tt the marker CD - >" + markerr.getContentDescription() + "<");
+//        markerr.clickAndWaitForNewWindow();
+
+
+        onView(withContentDescription("Item - 323. ")).perform(click());
 
     }
 
