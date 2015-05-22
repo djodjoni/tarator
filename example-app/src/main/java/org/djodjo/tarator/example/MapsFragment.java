@@ -81,7 +81,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             JsonObject item = je.asJsonObject();
             LatLng latLng = new LatLng(item.getJsonArray("loc").getDouble(0), item.getJsonArray("loc").getDouble(1));
 
-            mMap.addMarker(new MarkerOptions().title(item.getString("title")).snippet(item.getString("info3")).position(latLng));
+            mMap.addMarker(new MarkerOptions()
+                    .title(item.getString("title"))
+                    //.snippet(item.getString("info3"))
+                    .position(latLng));
             builder.include(latLng);
         }
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 80));

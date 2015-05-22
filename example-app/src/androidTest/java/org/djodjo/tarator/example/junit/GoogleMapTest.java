@@ -33,6 +33,7 @@ public class GoogleMapTest extends BaseActivityTest {
     public void testSelection() throws Exception {
         openDrawer(R.id.drawer_layout);
          onView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section2))).perform(click());
+        Thread.sleep(3000);
         View mapContainer  = onView(withId(R.id.map)).getTargetView();
         Log.d("TT", "tt map container - " + mapContainer);
         TextureView map = (TextureView) onView(withContentDescription("Google Map")).getTargetView();
@@ -43,6 +44,10 @@ public class GoogleMapTest extends BaseActivityTest {
 //            View marker = map.getChildAt(i);
 //            Log.d("TT", "tt marker - " + marker);
 //        }
+
+
+        View marker = onView(withContentDescription("Item - 1.")).getTargetView();
+        Log.d("TT", "tt marker - " + marker);
 
     }
 
