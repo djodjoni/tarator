@@ -2,7 +2,6 @@ package org.djodjo.tarator.iteraction;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import org.assertj.android.api.view.ViewAssert;
 import org.djodjo.tarator.FailureHandler;
@@ -61,7 +60,7 @@ public class ViewInteraction extends AbstractViewInteraction<ViewAssert> {
           Log.e(TAG, description.toString());
           throw missingViewException;
         }
-        tva[0] = new ViewAssert((TextView)targetView);
+        tva[0] = new ViewAssert((View)targetView);
       }
     });
     return tva[0];
