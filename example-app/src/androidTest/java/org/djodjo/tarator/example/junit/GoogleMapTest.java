@@ -1,7 +1,9 @@
 package org.djodjo.tarator.example.junit;
 
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.os.Build;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiSelector;
@@ -9,16 +11,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityNodeProvider;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 
 import org.djodjo.tarator.example.MainActivity;
 import org.djodjo.tarator.example.R;
-
-import java.util.List;
 
 import static org.djodjo.tarator.Tarator.onView;
 import static org.djodjo.tarator.action.ViewActions.click;
@@ -41,25 +39,37 @@ public class GoogleMapTest extends BaseActivityTest {
         act = getActivity();
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public void testSelection() throws Exception {
         openDrawer(R.id.drawer_layout);
          onView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section2))).perform(click());
-        Thread.sleep(5000);
+        //Thread.sleep(5000);
         View mapContainer  = onView(withId(R.id.map)).getTargetView();
         Log.d("TT", "tt map container - " + mapContainer);
-        TextureView map = (TextureView) onView(withContentDescription("Google Map")).getTargetView();
+        final TextureView map = (TextureView) onView(withContentDescription("Google Map")).getTargetView();
         Log.d("TT", "tt map - " + map.getClass());
         Log.d("TT", "tt map - " + map.getClass().getSuperclass());
 
 
 //        AccessibilityService.
-        List<AccessibilityNodeInfo> inViews ;
-        AccessibilityNodeProvider anp = mapContainer.getAccessibilityNodeProvider();
-        inViews = anp.findAccessibilityNodeInfosByText("Item - 32", -1);
-        for( AccessibilityNodeInfo inner : inViews) {
-            Log.d("TT", "tt inner - " + inner.getContentDescription());
-//            Log.d("TT", "tt inner touchables - " + ((TextureView) touchable).getTouchables().get(0).getClass());
-        }
+
+
+
+//        act.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                List<AccessibilityNodeInfo> inViews ;
+//                AccessibilityNodeProvider anp = map.getAccessibilityNodeProvider();
+//                AccessibilityNodeInfo inf = anp.findFocus(-1);
+//                //Log.d("TT", "tt inf - " + inf.getContentDescription());
+//                inViews = anp.findAccessibilityNodeInfosByText("Item - 32", -1);
+//                for( AccessibilityNodeInfo inner : inViews) {
+//                    Log.d("TT", "tt inner - " + inner.getContentDescription());
+////            Log.d("TT", "tt inner touchables - " + ((TextureView) touchable).getTouchables().get(0).getClass());
+//                }
+//            }
+//        });
+
 
 //        for(int i=0;i<map.getChildCount();i++) {
 //            View marker = map.getChildAt(i);
@@ -84,6 +94,7 @@ public class GoogleMapTest extends BaseActivityTest {
 
 
       //  onView(withContentDescription("Item - 323. ")).perform(click());
+
 
     }
 
