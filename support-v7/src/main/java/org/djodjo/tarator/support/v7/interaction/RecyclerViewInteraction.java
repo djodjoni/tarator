@@ -47,10 +47,10 @@ public class RecyclerViewInteraction extends AbstractViewInteraction<RecyclerVie
 
     public ViewHolderInteraction onViewHolderAtPosition(final int position) {
         final RecyclerView.ViewHolder[] vh = new RecyclerView.ViewHolder[1];
+        final RecyclerView targetView = (RecyclerView) findTargetView();
         runSynchronouslyOnUiThread(new Runnable() {
             @Override
             public void run() {
-                RecyclerView targetView = (RecyclerView) findTargetView();
                 vh[0] = findViewHolder(targetView, position);
                 targetView.getAdapter().bindViewHolder(vh[0], position);
             }
@@ -72,10 +72,10 @@ public class RecyclerViewInteraction extends AbstractViewInteraction<RecyclerVie
 
     private RecyclerView.ViewHolder matchViewHolderSynchronouslyOnUiThread(final Matcher<? extends RecyclerView.ViewHolder> viewHolderMatcher, final int atPosition) {
         final RecyclerView.ViewHolder[] vh = new RecyclerView.ViewHolder[1];
+        final RecyclerView targetView = (RecyclerView) findTargetView();
         runSynchronouslyOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final RecyclerView targetView = (RecyclerView) findTargetView();
                 new ScrollToViewAction(viewHolderMatcher, atPosition).perform(uiController, targetView);
                 uiController.loopMainThreadUntilIdle();
                 int e = atPosition == -1 ? 2 : atPosition + 1;
