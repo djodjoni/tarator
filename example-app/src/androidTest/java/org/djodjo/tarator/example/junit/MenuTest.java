@@ -5,8 +5,6 @@ import android.app.Activity;
 
 import org.djodjo.tarator.example.MainActivity;
 import org.djodjo.tarator.example.R;
-import org.djodjo.tarator.iteraction.TextViewInteraction;
-import org.junit.Ignore;
 
 import static org.djodjo.tarator.Tarator.onTextView;
 import static org.djodjo.tarator.Tarator.onView;
@@ -17,7 +15,7 @@ import static org.djodjo.tarator.matcher.ViewMatchers.withText;
 import static org.djodjo.tarator.support.v4.action.DrawerActions.closeDrawer;
 import static org.djodjo.tarator.support.v4.action.DrawerActions.openDrawer;
 
-@Ignore
+
 public class MenuTest extends BaseActivityTest {
 
     public MenuTest() {
@@ -35,8 +33,15 @@ public class MenuTest extends BaseActivityTest {
     public void testSelection() throws Exception {
         closeDrawer(R.id.drawer_layout);
         openDrawer(R.id.drawer_layout);
-        onTextView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section1))).<TextViewInteraction>check(matches(isDisplayed())).assertThat().isVisible();
-        onView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section1))).perform(click());
+        onTextView(
+                withText(getInstrumentation().getTargetContext().getString(R.string.title_section1)))
+                .check(matches(isDisplayed()))
+                .assertThat().isVisible()
+        ;
+
+
+        onView(withText(getInstrumentation().getTargetContext().getString(R.string.title_section1)))
+                .perform(click());
         //must be closed anyway
         closeDrawer(R.id.drawer_layout);
         openDrawer(R.id.drawer_layout);

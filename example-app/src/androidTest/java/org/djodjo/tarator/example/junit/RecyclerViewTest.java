@@ -6,7 +6,6 @@ import android.app.Activity;
 import org.djodjo.tarator.example.MainActivity;
 import org.djodjo.tarator.example.R;
 import org.djodjo.tarator.support.v7.action.RecyclerViewActions;
-import org.junit.Ignore;
 
 import static org.djodjo.tarator.Tarator.onView;
 import static org.djodjo.tarator.action.ViewActions.click;
@@ -18,7 +17,7 @@ import static org.djodjo.tarator.matcher.ViewMatchers.withText;
 import static org.djodjo.tarator.support.v4.action.DrawerActions.openDrawer;
 import static org.djodjo.tarator.support.v7.Tarator.onRecyclerView;
 import static org.djodjo.tarator.support.v7.matcher.ViewHolderMatchers.itemViewMatcher;
-@Ignore
+
 public class RecyclerViewTest extends BaseActivityTest {
 
     public RecyclerViewTest() {
