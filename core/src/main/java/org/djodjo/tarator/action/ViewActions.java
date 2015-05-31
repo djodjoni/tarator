@@ -323,4 +323,14 @@ public final class ViewActions {
     Preconditions.checkNotNull(uriMatcher);
     return actionWithAssertions(new OpenLinkAction(linkTextMatcher, uriMatcher));
   }
+
+  public static ViewAction setProgress(int progressToBeSet) {
+    return new SetProgressAction(progressToBeSet, SetProgressAction.ProgressType.PRIMARY);
+  }
+
+  public static ViewAction setSecondaryProgress(int progressToBeSet) {
+    return new SetProgressAction(progressToBeSet, SetProgressAction.ProgressType.SECONDARY);
+  }
+
+
 }
