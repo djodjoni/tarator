@@ -53,7 +53,7 @@ public abstract class AbstractViewInteraction<S extends AbstractViewInteraction<
   protected final S myself;
 
 
-  public AbstractViewInteraction(
+  protected AbstractViewInteraction(
           UiController uiController,
           ViewFinder viewFinder,
           @MainThread Executor mainThreadExecutor,
@@ -177,43 +177,20 @@ public abstract class AbstractViewInteraction<S extends AbstractViewInteraction<
   }
 
   protected A assertThat(final Class<?> assertClass, final Class<?> actualClass) {
-    final Object[] va = {null};
-    runSynchronouslyOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        uiController.loopMainThreadUntilIdle();
-
-        View targetView = null;
-        NoMatchingViewException missingViewException = null;
-        try {
-          targetView = viewFinder.getView();
-        } catch (NoMatchingViewException nmve) {
-          missingViewException = nmve;
-        }
-        StringDescription description = new StringDescription();
-        description.appendText("'");
-        viewMatcher.describeTo(description);
-        if (missingViewException != null) {
-          description.appendText(String.format(
-                  "' check could not be performed because view '%s' was not found.\n", viewMatcher));
-          Log.e(TAG, description.toString());
-          throw missingViewException;
-        }
-
-        try {
-          va[0] = assertClass.getDeclaredConstructor(actualClass).newInstance(targetView);
-        } catch (InstantiationException e) {
-          e.printStackTrace();
-        } catch (IllegalAccessException e) {
-          e.printStackTrace();
-        } catch (InvocationTargetException e) {
-          e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-          e.printStackTrace();
-        }
-      }
-    });
-    return (A) va[0];
+    A va = null;
+    final View targetView = getTargetView();
+    try {
+      va = (A) assertClass.getDeclaredConstructor(actualClass).newInstance(targetView);
+    } catch (InstantiationException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    } catch (NoSuchMethodException e) {
+      e.printStackTrace();
+    }
+    return  va;
   }
 
   public abstract A assertThat();
@@ -228,6 +205,11 @@ public abstract class AbstractViewInteraction<S extends AbstractViewInteraction<
    */
   @Deprecated
   public View getTargetView() {
+    return findTargetView();
+  }
+
+
+  protected View findTargetView() {
     final View[] targetView = {null};
     runSynchronouslyOnUiThread(new Runnable() {
       @Override
@@ -240,6 +222,16 @@ public abstract class AbstractViewInteraction<S extends AbstractViewInteraction<
         } catch (NoMatchingViewException nmve) {
           missingViewException = nmve;
         }
+        StringDescription description = new StringDescription();
+        description.appendText("'");
+        viewMatcher.describeTo(description);
+        if (missingViewException != null) {
+          description.appendText(String.format(
+                  "' check could not be performed because view '%s' was not found.\n", viewMatcher));
+          Log.e(TAG, description.toString());
+          throw missingViewException;
+        }
+
       }
     });
     return targetView[0];

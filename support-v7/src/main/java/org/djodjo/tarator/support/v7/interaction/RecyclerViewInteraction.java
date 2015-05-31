@@ -1,13 +1,11 @@
 package org.djodjo.tarator.support.v7.interaction;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
 import org.assertj.android.recyclerview.v7.api.widget.RecyclerViewAssert;
 import org.djodjo.tarator.FailureHandler;
 import org.djodjo.tarator.GraphHolder;
-import org.djodjo.tarator.NoMatchingViewException;
 import org.djodjo.tarator.PerformException;
 import org.djodjo.tarator.Root;
 import org.djodjo.tarator.UiController;
@@ -19,7 +17,6 @@ import org.djodjo.tarator.support.v7.action.RecyclerViewActions;
 import org.djodjo.tarator.support.v7.action.ScrollToViewAction;
 import org.djodjo.tarator.util.HumanReadables;
 import org.hamcrest.Matcher;
-import org.hamcrest.StringDescription;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -48,24 +45,12 @@ public class RecyclerViewInteraction extends AbstractViewInteraction<RecyclerVie
         super(uiController, viewFinder, mainThreadExecutor, failureHandler, viewMatcher, rootMatcherRef, RecyclerViewInteraction.class);
     }
 
-    public RecyclerViewAssert assertThat() {
-        final RecyclerViewAssert[] tva = {null};
-        runSynchronouslyOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                RecyclerView targetView = findTargetView();
-                tva[0] = new RecyclerViewAssert(targetView);
-            }
-        });
-        return tva[0];
-    }
-
     public ViewHolderInteraction onViewHolderAtPosition(final int position) {
         final RecyclerView.ViewHolder[] vh = new RecyclerView.ViewHolder[1];
         runSynchronouslyOnUiThread(new Runnable() {
             @Override
             public void run() {
-                RecyclerView targetView = findTargetView();
+                RecyclerView targetView = (RecyclerView) findTargetView();
                 vh[0] = findViewHolder(targetView, position);
                 targetView.getAdapter().bindViewHolder(vh[0], position);
             }
@@ -90,7 +75,7 @@ public class RecyclerViewInteraction extends AbstractViewInteraction<RecyclerVie
         runSynchronouslyOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final RecyclerView targetView = findTargetView();
+                final RecyclerView targetView = (RecyclerView) findTargetView();
                 new ScrollToViewAction(viewHolderMatcher, atPosition).perform(uiController, targetView);
                 uiController.loopMainThreadUntilIdle();
                 int e = atPosition == -1 ? 2 : atPosition + 1;
@@ -118,27 +103,9 @@ public class RecyclerViewInteraction extends AbstractViewInteraction<RecyclerVie
         return vh;
     }
 
-    private RecyclerView findTargetView() {
-        uiController.loopMainThreadUntilIdle();
 
-        RecyclerView targetView = null;
-        NoMatchingViewException missingViewException = null;
-        try {
-            targetView = (RecyclerView) viewFinder.getView();
-        } catch (NoMatchingViewException nmve) {
-            missingViewException = nmve;
-        }
-        StringDescription description = new StringDescription();
-        description.appendText("'");
-        viewMatcher.describeTo(description);
-        if (missingViewException != null) {
-            description.appendText(String.format(
-                    "' RecyclerView '%s' was not found.\n", viewMatcher));
-            Log.e(TAG, description.toString());
-            throw missingViewException;
-        }
-
-        return targetView;
+    @Override
+    public RecyclerViewAssert assertThat() {
+        return assertThat(RecyclerViewAssert.class, RecyclerView.class);
     }
-
 }
