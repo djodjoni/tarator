@@ -11,11 +11,8 @@ import org.djodjo.tarator.Root;
 import org.djodjo.tarator.UiController;
 import org.djodjo.tarator.ViewFinder;
 import org.djodjo.tarator.base.MainThread;
-import org.djodjo.tarator.iteraction.AbstractViewInteraction;
-import org.djodjo.tarator.iteraction.ButtonInteraction;
-import org.djodjo.tarator.iteraction.CompoundButtonInteraction;
-import org.djodjo.tarator.iteraction.TextViewInteraction;
-import org.djodjo.tarator.iteraction.ViewInteraction;
+import org.djodjo.tarator.iteraction.*;
+import org.djodjo.tarator.iteraction.ViewInteractionModule;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
@@ -64,9 +61,10 @@ public class ViewHolderInteraction
         return GraphHolder.graph().plus(new ViewHolderViewItemInteractionModule(viewSubItemMatcher, viewHolder.itemView)).get(CompoundButtonInteraction.class);
     }
 
-    public AbstractViewInteraction onViewIem() {
-        AbstractViewInteraction vi = null;
-        vi = new AbstractViewInteraction(uiController, viewSubItemFinder, mainThreadExecutor, failureHandler, new Matcher<View>() {
+    public ViewInteraction onViewIem() {
+        ViewInteraction vi = null;
+        vi = GraphHolder.graph().plus(new ViewInteractionModule(
+         new Matcher<View>() {
             @Override
             public boolean matches(Object item) {
                 return true;
@@ -86,7 +84,7 @@ public class ViewHolderInteraction
             public void describeTo(Description description) {
 
             }
-        }, rootMatcherRef);
+        })).get(ViewInteraction.class);
         return vi;
     }
 

@@ -7,7 +7,6 @@ import android.widget.AdapterView;
 import com.google.common.base.Preconditions;
 
 import org.assertj.android.api.view.AbstractViewAssert;
-import org.assertj.android.api.view.ViewAssert;
 import org.djodjo.tarator.FailureHandler;
 import org.djodjo.tarator.NoMatchingViewException;
 import org.djodjo.tarator.PerformException;
@@ -22,12 +21,11 @@ import org.djodjo.tarator.util.HumanReadables;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.djodjo.tarator.matcher.ViewMatchers.isAssignableFrom;
@@ -42,7 +40,7 @@ import static org.djodjo.tarator.matcher.ViewMatchers.isDescendantOfA;
  * operation).
  * <p>
  */
-public class AbstractViewInteraction<A extends AbstractViewAssert> {
+public abstract class AbstractViewInteraction<S extends AbstractViewInteraction<S, A>, A extends AbstractViewAssert> {
 
   private static final String TAG = AbstractViewInteraction.class.getSimpleName();
 
@@ -52,21 +50,24 @@ public class AbstractViewInteraction<A extends AbstractViewAssert> {
   protected volatile FailureHandler failureHandler;
   protected final Matcher<View> viewMatcher;
   protected final AtomicReference<Matcher<Root>> rootMatcherRef;
+  protected final S myself;
 
-  @Inject
+
   public AbstractViewInteraction(
           UiController uiController,
           ViewFinder viewFinder,
           @MainThread Executor mainThreadExecutor,
           FailureHandler failureHandler,
           Matcher<View> viewMatcher,
-          AtomicReference<Matcher<Root>> rootMatcherRef) {
+          AtomicReference<Matcher<Root>> rootMatcherRef
+          , Class<?> selfType) {
     this.viewFinder = checkNotNull(viewFinder);
     this.uiController = checkNotNull(uiController);
     this.failureHandler = checkNotNull(failureHandler);
     this.mainThreadExecutor = checkNotNull(mainThreadExecutor);
     this.viewMatcher = checkNotNull(viewMatcher);
     this.rootMatcherRef = checkNotNull(rootMatcherRef);
+    myself = (S) selfType.cast(this);
   }
 
   /**
@@ -77,26 +78,26 @@ public class AbstractViewInteraction<A extends AbstractViewAssert> {
    * @param viewActions one or more actions to execute.
    * @return this interaction for further perform/verification calls.
    */
-  public <T extends AbstractViewInteraction> T perform(final ViewAction... viewActions) {
+  public S perform(final ViewAction... viewActions) {
     checkNotNull(viewActions);
     for (ViewAction action : viewActions) {
       doPerform(action);
     }
-    return (T)this;
+    return myself;
   }
 
 
-  public AbstractViewInteraction withFailureHandler(FailureHandler failureHandler) {
+  public S withFailureHandler(FailureHandler failureHandler) {
     this.failureHandler = (FailureHandler) Preconditions.checkNotNull(failureHandler);
-    return this;
+    return myself;
   }
 
   /**
    * Makes this ViewInteraction scoped to the root selected by the given root matcher.
    */
-  public  <T extends AbstractViewInteraction> T inRoot(Matcher<Root> rootMatcher) {
+  public S inRoot(Matcher<Root> rootMatcher) {
     this.rootMatcherRef.set(checkNotNull(rootMatcher));
-    return (T)this;
+    return myself;
   }
 
   private void doPerform(final ViewAction viewAction) {
@@ -143,7 +144,7 @@ public class AbstractViewInteraction<A extends AbstractViewAssert> {
    * @param viewAssert the assertion to perform.
    * @return this interaction for further perform/verification calls.
    */
-  public <T extends AbstractViewInteraction> T check(final ViewAssertion viewAssert) {
+  public S check(final ViewAssertion viewAssert) {
     checkNotNull(viewAssert);
     runSynchronouslyOnUiThread(new Runnable() {
       @Override
@@ -160,7 +161,7 @@ public class AbstractViewInteraction<A extends AbstractViewAssert> {
         viewAssert.check(targetView, missingViewException);
       }
     });
-    return (T)this;
+    return myself;
   }
 
   protected void runSynchronouslyOnUiThread(Runnable action) {
@@ -175,8 +176,8 @@ public class AbstractViewInteraction<A extends AbstractViewAssert> {
     }
   }
 
-  public A assertThat() {
-    final ViewAssert[] va = {null};
+  protected A assertThat(final Class<?> assertClass, final Class<?> actualClass) {
+    final Object[] va = {null};
     runSynchronouslyOnUiThread(new Runnable() {
       @Override
       public void run() {
@@ -198,12 +199,24 @@ public class AbstractViewInteraction<A extends AbstractViewAssert> {
           Log.e(TAG, description.toString());
           throw missingViewException;
         }
-        va[0] = new ViewAssert(targetView);
+
+        try {
+          va[0] = assertClass.getDeclaredConstructor(actualClass).newInstance(targetView);
+        } catch (InstantiationException e) {
+          e.printStackTrace();
+        } catch (IllegalAccessException e) {
+          e.printStackTrace();
+        } catch (InvocationTargetException e) {
+          e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+          e.printStackTrace();
+        }
       }
     });
     return (A) va[0];
   }
 
+  public abstract A assertThat();
 
   /**
    * Get matching target view in order to retrieve view properties.

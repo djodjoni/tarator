@@ -38,14 +38,14 @@ import static org.djodjo.tarator.support.v7.action.RecyclerViewActions.scrollToP
  * operation).
  * <p/>
  */
-public class RecyclerViewInteraction extends AbstractViewInteraction<RecyclerViewAssert> {
+public class RecyclerViewInteraction extends AbstractViewInteraction<RecyclerViewInteraction, RecyclerViewAssert> {
 
     private static final String TAG = RecyclerViewInteraction.class.getSimpleName();
 
 
     @Inject
     RecyclerViewInteraction(UiController uiController, ViewFinder viewFinder, @MainThread Executor mainThreadExecutor, FailureHandler failureHandler, Matcher<View> viewMatcher, AtomicReference<Matcher<Root>> rootMatcherRef) {
-        super(uiController, viewFinder, mainThreadExecutor, failureHandler, viewMatcher, rootMatcherRef);
+        super(uiController, viewFinder, mainThreadExecutor, failureHandler, viewMatcher, rootMatcherRef, RecyclerViewInteraction.class);
     }
 
     public RecyclerViewAssert assertThat() {

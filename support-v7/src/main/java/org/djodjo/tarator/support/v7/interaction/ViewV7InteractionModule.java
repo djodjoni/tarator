@@ -25,13 +25,13 @@ import static org.djodjo.tarator.Checks.checkNotNull;
         injects = {
                 RecyclerViewInteraction.class
         })
-public class ViewInteractionModule  {
+public class ViewV7InteractionModule {
 
     private final Matcher<View> viewMatcher;
     private final AtomicReference<Matcher<Root>> rootMatcher =
             new AtomicReference<Matcher<Root>>(RootMatchers.DEFAULT);
 
-    public ViewInteractionModule(Matcher<View> viewMatcher) {
+    public ViewV7InteractionModule(Matcher<View> viewMatcher) {
         this.viewMatcher = checkNotNull(viewMatcher);
     }
 
