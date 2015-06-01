@@ -27,7 +27,7 @@ android {
 
 dependencies {
     provided project (':core')
-    provided 'com.android.support:recyclerview-v7:22.1.1'
+    provided 'com.android.support:recyclerview-v7:22.2.0'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
     compile 'com.squareup.assertj:assertj-android-recyclerview-v7:1.0.1-SNAPSHOT@jar'
     compile 'com.squareup.assertj:assertj-android:1.0.1-SNAPSHOT@jar'
