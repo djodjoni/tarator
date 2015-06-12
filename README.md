@@ -1,4 +1,6 @@
-# tarator
-Cucumber/Gherkin + Espresso ~ Tarator
+# Tarator - Android Testing Kit
 
-Tarator - Cold Cucumber Soup
+( Cucumber(Gherkin), Espresso, AssertJ ) -> { Tarator }
+
+
+# Tarator Meaning - Cold Cucumber Soup 
