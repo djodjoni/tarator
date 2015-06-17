@@ -63,6 +63,7 @@ def getInstrumentationTestRunner() {
 }
 
 dependencies {
+
     androidTestCompile project(':runner')
     androidTestCompile project(':support-v4')
     androidTestCompile project(':support-v7')
@@ -80,7 +81,7 @@ dependencies {
     androidTestCompile 'com.android.support.test:runner:0.2'
     androidTestCompile 'com.android.support.test:rules:0.2'
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.0'
-
+    androidTestCompile 'com.squareup.okhttp:mockwebserver:2.4.0'
 
     //compile 'com.android.support.test.espresso:espresso-contrib:2.1'
     compile 'com.android.support:appcompat-v7:22.2.0'

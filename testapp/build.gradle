@@ -43,14 +43,14 @@ def getInstrumentationTestRunner() {
 
 dependencies {
     compile 'com.google.guava:guava:18.0'
-    compile 'com.android.support:support-v4:22.0.0'
-    compile 'com.android.support:appcompat-v7:22.0.0'
-    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
+    compile 'com.android.support:support-v4:22.2.0'
+    compile 'com.android.support:appcompat-v7:22.2.0'
+   // androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
     androidTestCompile(project(':core')) {
         exclude group: 'com.google.guava', module: 'guava'
     }
     androidTestCompile( project(':support-v4'))
     androidTestCompile project(':runner')
-    compile 'com.android.support:support-annotations:22.0.0'
+    compile 'com.android.support:support-annotations:22.2.0'
 
 }

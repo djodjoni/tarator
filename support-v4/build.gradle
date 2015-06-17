@@ -27,8 +27,8 @@ android {
 }
 
 dependencies {
-    provided project (':core')
-    provided 'com.android.support:support-v4:22.2.0'
+    compile project (':core')
+    compile 'com.android.support:support-v4:22.2.0'
 }
 
 apply from: 'https://raw.githubusercontent.com/djodjoni/gradle-mvn-push/master/gradle-mvn-push-android.gradle'
