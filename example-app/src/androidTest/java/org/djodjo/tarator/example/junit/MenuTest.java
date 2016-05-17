@@ -2,9 +2,12 @@ package org.djodjo.tarator.example.junit;
 
 
 import android.app.Activity;
+import android.widget.TextView;
 
 import org.djodjo.tarator.example.MainActivity;
 import org.djodjo.tarator.example.R;
+
+import io.apptik.tarator.yogurt.widget.TextViewInteraction;
 
 import static org.djodjo.tarator.Tarator.onTextView;
 import static org.djodjo.tarator.Tarator.onView;
@@ -48,6 +51,14 @@ public class MenuTest extends BaseActivityTest {
         closeDrawer(R.id.drawer_layout);
 
 
+    }
+
+    public void temp()  throws Exception {
+        MainActivity act= getActivity();
+        TextView view = (TextView) act.findViewById(R.id.drawer_layout);
+
+        TextViewInteraction viewInteraction =  new TextViewInteraction(view);
+        viewInteraction.assertThat().hasAlpha2
     }
 
 

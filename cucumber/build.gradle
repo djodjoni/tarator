@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    buildToolsVersion "23.0.0 rc2"
 
     defaultConfig {
         minSdkVersion 15
@@ -16,19 +16,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    packagingOptions {
-        exclude 'LICENSE.txt'
-        exclude 'NOTICE.txt'
-    }
-    lintOptions {
-        abortOnError false
-    }
-
 }
 
 dependencies {
     compile project (':yogurt-old')
-    compile 'com.android.support:support-v4:22.2.0'
+    compile 'info.cukes:cucumber-java:1.2.2'
 }
-
-apply from: 'https://raw.githubusercontent.com/djodjoni/gradle-mvn-push/master/gradle-mvn-push-android.gradle'

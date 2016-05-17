@@ -46,11 +46,11 @@ dependencies {
     compile 'com.android.support:support-v4:22.2.0'
     compile 'com.android.support:appcompat-v7:22.2.0'
    // androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
-    androidTestCompile(project(':core')) {
+    androidTestCompile(project(':yogurt-old')) {
         exclude group: 'com.google.guava', module: 'guava'
     }
     androidTestCompile( project(':support-v4'))
-    androidTestCompile project(':runner')
+    androidTestCompile project(':spoon')
     compile 'com.android.support:support-annotations:22.2.0'
 
 }

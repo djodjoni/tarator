@@ -70,9 +70,8 @@ dependencies {
     androidTestCompile project(':support-v7')
     //androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
     //androidTestCompile 'com.android.support.test.espresso:espresso-core:2.1'
-    androidTestCompile(project(':yogurt')) {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
+    androidTestCompile(project(':yogurt'))
+
     androidTestCompile(project(':cucumber'))
 
     androidTestCompile('info.cukes:cucumber-android:1.2.2') {
@@ -94,7 +93,7 @@ dependencies {
     compile 'com.android.support:cardview-v7:22.2.0'
     compile 'com.android.support:support-annotations:22.2.0'
     compile 'com.google.guava:guava:18.0'
-    compile 'org.djodjo.comm:jus-core:0.4.1'
+    compile 'org.djodjo.comm:jus:0.3.3'
     compile 'org.djodjo.json:json-core:1.+'
     compile 'org.djodjo.json:json-wrapper:1.+'
 
